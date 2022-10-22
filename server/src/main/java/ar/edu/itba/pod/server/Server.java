@@ -14,7 +14,7 @@ public class Server {
     private static final String propertiesFile = "config.properties";
 
     public static void main(String[] args) throws IOException {
-        logger.info("Server Starting");
+        logger.info("Server starting");
         String ip = "192.168.0.*", name = "g9", pass = "g9-pass";
         try {
             Properties props = new Properties();
