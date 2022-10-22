@@ -2,7 +2,11 @@ package ar.edu.itba.pod.client;
 
 import java.util.stream.Stream;
 
-public class Utils {
+public final class Utils {
+
+    private Utils() {
+
+    }
 
     public static String parseParameter(String[] args, String requestedParam){
         return Stream.of(args).filter(arg -> arg.contains(requestedParam))

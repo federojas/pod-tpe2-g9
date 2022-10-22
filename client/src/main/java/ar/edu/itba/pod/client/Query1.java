@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import static ar.edu.itba.pod.client.Utils.parseParameter;
+import static ar.edu.itba.pod.client.Utils.*;
 
 public class Query1 {
 
