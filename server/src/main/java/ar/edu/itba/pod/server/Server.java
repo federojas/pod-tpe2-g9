@@ -55,8 +55,6 @@ public class Server {
 //                .setEnabled(true);
 //        config.setManagementCenterConfig(managementCenterConfig);
 
-
-
         Hazelcast.newHazelcastInstance(config);
     }
 }

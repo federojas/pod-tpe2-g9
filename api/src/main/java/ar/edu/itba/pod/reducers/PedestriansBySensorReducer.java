@@ -1,4 +1,4 @@
-package reducers;
+package ar.edu.itba.pod.reducers;
 
 import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;

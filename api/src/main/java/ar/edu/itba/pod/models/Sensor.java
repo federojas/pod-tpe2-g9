@@ -1,4 +1,4 @@
-package models;
+package ar.edu.itba.pod.models;
 
 public class Sensor {
     private Status status;
