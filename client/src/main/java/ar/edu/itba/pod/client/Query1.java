@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.client;
 
+import com.hazelcast.core.HazelcastInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,8 @@ public class Query1 {
         File logFile = new File(parseParameter(args, "-DoutPath")+"/time1.txt");
         logFile.createNewFile();
         FileWriter logWriter = new FileWriter(logFile);
+
+        HazelcastInstance hz = Utils.getHazelClientInstance(args);
     }
 
 
