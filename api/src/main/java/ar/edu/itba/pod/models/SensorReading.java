@@ -8,16 +8,14 @@ public class SensorReading {
     private String day;
     private Long hourlyCounts;
 
-    public SensorReading(Sensor sensor, Long year, String month, Integer mDate,
+    public SensorReading(Long year, String month, Integer mDate,
                          String day, Long hourlyCounts) {
-        this.sensor = sensor;
         this.year = year;
         this.month = month;
         this.mDate = mDate;
         this.day = day;
         this.hourlyCounts = hourlyCounts;
     }
-
 
     public Sensor getSensor() {
         return sensor;
@@ -41,6 +39,10 @@ public class SensorReading {
 
     public Long getHourlyCounts() {
         return hourlyCounts;
+    }
+
+    public void setSensor(Sensor sensor) {
+        this.sensor = sensor;
     }
 }
 
