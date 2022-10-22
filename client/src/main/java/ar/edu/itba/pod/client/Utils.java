@@ -6,6 +6,10 @@ import com.hazelcast.client.config.ClientNetworkConfig;
 import com.hazelcast.config.GroupConfig;
 import com.hazelcast.core.HazelcastInstance;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.stream.Stream;
 
 public final class Utils {
@@ -37,5 +41,10 @@ public final class Utils {
         clientConfig.setNetworkConfig(clientNetworkConfig);
 
         return HazelcastClient.newHazelcastClient(clientConfig);
+    }
+
+    public static void logWithTimeStamp(FileWriter logWriter, String message) throws IOException {
+        String timestamp = (new SimpleDateFormat("dd/MM/yyyy hh:mm:ss:SSSS")).format(new Date());
+        logWriter.write(timestamp + " - " + message + "\n");
     }
 }

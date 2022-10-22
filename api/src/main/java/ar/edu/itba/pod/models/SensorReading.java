@@ -10,12 +10,14 @@ public class SensorReading {
 
     public SensorReading(Sensor sensor, Long year, String month, Integer mDate,
                          String day, Long hourlyCounts) {
+        this.sensor = sensor;
         this.year = year;
         this.month = month;
         this.mDate = mDate;
         this.day = day;
         this.hourlyCounts = hourlyCounts;
     }
+
 
     public Sensor getSensor() {
         return sensor;
