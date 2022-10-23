@@ -3,7 +3,6 @@ package ar.edu.itba.pod.client;
 import ar.edu.itba.pod.combiners.PedestriansBySensorCombiner;
 import ar.edu.itba.pod.mappers.PedestriansBySensorMapper;
 import ar.edu.itba.pod.models.Query1Reading;
-import ar.edu.itba.pod.models.SensorReading;
 import ar.edu.itba.pod.reducers.PedestriansBySensorReducer;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.core.HazelcastInstance;

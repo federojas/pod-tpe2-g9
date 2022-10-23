@@ -2,7 +2,6 @@ package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.models.Query1Reading;
 import ar.edu.itba.pod.models.Sensor;
-import ar.edu.itba.pod.models.SensorReading;
 import ar.edu.itba.pod.models.Status;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
