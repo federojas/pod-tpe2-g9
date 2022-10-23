@@ -1,13 +1,8 @@
 package ar.edu.itba.pod.client;
 
-import ar.edu.itba.pod.combiners.PedestriansBySensorCombiner;
-import ar.edu.itba.pod.mappers.PedestriansBySensorMapper;
 import ar.edu.itba.pod.mappers.PedestriansPerYearMapper;
-import ar.edu.itba.pod.models.Query1Reading;
 import ar.edu.itba.pod.models.Query2Reading;
 import ar.edu.itba.pod.models.YearCount;
-import ar.edu.itba.pod.models.YearReading;
-import ar.edu.itba.pod.reducers.PedestriansBySensorReducer;
 import ar.edu.itba.pod.reducers.PedestriansPerYearReducer;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.core.HazelcastInstance;
