@@ -1,10 +1,12 @@
 package ar.edu.itba.pod.models;
 
-public class Sensor {
-    private Status status;
-    private String sensorName;
-    private String description;
-    private Long sensorId;
+import java.io.Serializable;
+
+public class Sensor implements Serializable {
+    private final Status status;
+    private final String sensorName;
+    private final String description;
+    private final Long sensorId;
 
     public Sensor(Status status, String sensorName, String description, Long sensorId) {
         this.status = status;

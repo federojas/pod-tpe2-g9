@@ -72,7 +72,7 @@ public final class Utils {
         for(String line : lines) {
             String[] values = line.split("[;]");
 
-            SensorReading sr = new SensorReading(Long.valueOf(values[2]), values[3], Integer.valueOf(values[4]), values[5], Long.valueOf(values[9]));
+            SensorReading sr = new SensorReading(null, Long.valueOf(values[2]), values[3], Integer.valueOf(values[4]), values[5], Long.valueOf(values[9]));
 
             readings.put(Long.parseLong(values[0]), sr);
             readingsLoaded++;

@@ -1,7 +1,10 @@
 package ar.edu.itba.pod.models;
 
 public enum Status {
-    A,
-    R,
-    I;
+    A("A"),
+    R("R"),
+    I("I");
+
+    Status(String value) {
+    }
 }

@@ -1,6 +1,8 @@
 package ar.edu.itba.pod.models;
 
-public class SensorReading {
+import java.io.Serializable;
+
+public class SensorReading implements Serializable {
     private Sensor sensor;
     private Long year;
     private String month;
@@ -8,8 +10,9 @@ public class SensorReading {
     private String day;
     private Long hourlyCounts;
 
-    public SensorReading(Long year, String month, Integer mDate,
+    public SensorReading(Sensor sensor, Long year, String month, Integer mDate,
                          String day, Long hourlyCounts) {
+        this.sensor = sensor;
         this.year = year;
         this.month = month;
         this.mDate = mDate;

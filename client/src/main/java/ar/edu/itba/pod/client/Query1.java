@@ -15,11 +15,9 @@ import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
@@ -40,16 +38,23 @@ public class Query1 {
         HazelcastInstance hz = Utils.getHazelClientInstance(args);
 
         IList<SensorReading> test = hz.getList("test");
-        Sensor sensor = new Sensor(Status.A, "1", "a", 1L);
+        Sensor sensor = new Sensor(Status.A, "Sensor Uno", "a", 1L);
         test.add(new SensorReading(sensor, 12L, "enero", 3, "lunes", 1L));
-        Sensor sensor2 = new Sensor(Status.I, "1", "a", 2L);
+
+        Sensor sensor2 = new Sensor(Status.I, "Sensor Dos", "a", 2L);
         test.add(new SensorReading(sensor2, 12L, "enero", 3, "lunes", 2L));
-        Sensor sensor3 = new Sensor(Status.R, "1", "a", 3L);
+
+        Sensor sensor3 = new Sensor(Status.R, "Sensor Tres", "a", 3L);
         test.add(new SensorReading(sensor3, 12L, "enero", 3, "lunes", 3L));
-        Sensor sensor4 = new Sensor(Status.A, "1", "a", 4L);
+
+        Sensor sensor4 = new Sensor(Status.A, "Sensor Uno", "a", 4L);
         test.add(new SensorReading(sensor4, 12L, "enero", 3, "lunes", 4L));
 
-        final KeyValueSource<String, SensorReading> dataSource = KeyValueSource.fromList(hz.getList("g9_sensors_readings"));
+        Sensor sensor33 = new Sensor(Status.A, "Sensor Tres", "a", 3L);
+        test.add(new SensorReading(sensor33, 12L, "enero", 3, "lunes", 3L));
+
+       // final KeyValueSource<String, SensorReading> dataSource = KeyValueSource.fromList(hz.getList("g9_sensors_readings"));
+        final KeyValueSource<String, SensorReading> dataSource = KeyValueSource.fromList(test);
 
         logWithTimeStamp(logWriter, "Inicio del trabajo map/reduce");
 
@@ -74,7 +79,7 @@ public class Query1 {
 //        csvWriter.write("NEIGHBOURHOOD;TREES\n");
 
         result.forEach(e -> {
-            System.out.println(e.getKey() + e.getValue());
+            System.out.println(e.getKey() + " " + e.getValue());
 //            try {
 //                csvWriter.write(e.getKey() + ";" + e.getValue() + "\n");
 //            } catch (IOException err) {
