@@ -1,6 +1,8 @@
 package ar.edu.itba.pod.models;
 
-public class YearCount {
+import java.io.Serializable;
+
+public class YearCount implements Serializable {
     private Long readingsInWeekends;
     private Long readingsInWorkweeks;
     private Long readingsTotal;

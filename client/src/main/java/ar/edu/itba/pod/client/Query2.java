@@ -62,7 +62,7 @@ public class Query2 {
         result.forEach(r -> {
             try {
                csvWriter.write(r.getKey() + ";" + r.getValue().getReadingsInWorkweeks() + ";"
-                       + r.getValue().getReadingsInWeekends() + ";" + r.getValue().getReadingsTotal());
+                       + r.getValue().getReadingsInWeekends() + ";" + r.getValue().getReadingsTotal() + "\n");
             } catch (IOException exception) {
                 HazelcastClient.shutdownAll();
             }

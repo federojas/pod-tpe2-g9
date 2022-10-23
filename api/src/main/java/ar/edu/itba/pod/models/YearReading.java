@@ -1,6 +1,8 @@
 package ar.edu.itba.pod.models;
 
-public class YearReading {
+import java.io.Serializable;
+
+public class YearReading implements Serializable {
     private Long readings;
     private boolean isWeekend;
 
