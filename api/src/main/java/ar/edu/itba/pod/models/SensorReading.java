@@ -4,19 +4,21 @@ import java.io.Serializable;
 
 public class SensorReading implements Serializable {
     private Sensor sensor;
-    private Long year;
-    private String month;
-    private Integer mDate;
-    private String day;
-    private Long hourlyCounts;
+    private final Long year;
+    private final String month;
+    private final Integer mDate;
+    private final String day;
+    private final String time;
+    private final Long hourlyCounts;
 
     public SensorReading(Sensor sensor, Long year, String month, Integer mDate,
-                         String day, Long hourlyCounts) {
+                         String day, String time, Long hourlyCounts) {
         this.sensor = sensor;
         this.year = year;
         this.month = month;
         this.mDate = mDate;
         this.day = day;
+        this.time = time;
         this.hourlyCounts = hourlyCounts;
     }
 
@@ -46,6 +48,10 @@ public class SensorReading implements Serializable {
 
     public void setSensor(Sensor sensor) {
         this.sensor = sensor;
+    }
+
+    public String getTime() {
+        return time;
     }
 }
 

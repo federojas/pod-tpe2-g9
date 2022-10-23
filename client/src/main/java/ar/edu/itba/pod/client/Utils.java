@@ -8,6 +8,8 @@ import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.client.config.ClientNetworkConfig;
 import com.hazelcast.config.GroupConfig;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IList;
+import com.hazelcast.core.IMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +32,6 @@ public final class Utils {
     private Utils() {
 
     }
-
-    private static final Logger logger = LoggerFactory.getLogger(Utils.class);
 
     public static String parseParameter(String[] args, String requestedParam) {
         return Stream.of(args).filter(arg -> arg.contains(requestedParam))
@@ -64,63 +64,43 @@ public final class Utils {
     }
 
 
-    public static Map<Long, SensorReading> loadSensorReadingsFromCSV(String dir, HazelcastInstance hz) throws IOException {
-        Map<Long, SensorReading> readings = new HashMap<>();
+    public static List<SensorReading> loadSensorReadingsFromCSV(Map<Long,Sensor> sensorMap, String dir) throws IOException {
+        List<SensorReading> readings = new ArrayList<>();
         List<String> lines = Files.readAllLines(Paths.get(dir + "/" + READINGS_FILE_NAME), StandardCharsets.ISO_8859_1);
-
-        int readingsLoaded = 0;
+        lines.remove(0);
         for(String line : lines) {
-            String[] values = line.split("[;]");
+            String[] values = line.split(";");
+            if(sensorMap.containsKey(Long.parseLong(values[7]))) {
+                SensorReading sr = new SensorReading(sensorMap.get(Long.parseLong(values[7])), Long.parseLong(values[2]),
+                        values[3], Integer.parseInt(values[4]), values[5], values[6], Long.parseLong(values[9]));
 
-            SensorReading sr = new SensorReading(null, Long.valueOf(values[2]), values[3], Integer.valueOf(values[4]), values[5], Long.valueOf(values[9]));
-
-            readings.put(Long.parseLong(values[0]), sr);
-            readingsLoaded++;
+                readings.add(sr);
+            }
         }
-
-        logger.info("{} readings added", readingsLoaded);
-
-//        TODAVIA NO LO USAMOS
-//        IMap<Long, SensorReading> readingsIMap = hz.getMap("readings");
-//        readingsIMap.clear();
-//        readingsIMap.putAll(readings);
-
         return readings;
     }
 
     public static void loadSensorsFromCSV(String[] args, HazelcastInstance hz, FileWriter timestampWriter) throws IOException {
-        logWithTimeStamp(timestampWriter, "Inicio de la lectura del archivo");
 
+        Map<Long, Sensor> sensorMap = new HashMap<>();
         String dir = parseParameter(args, "-DinPath");
 
-        // Cargo la lista de SensorReadings con el conteo por cada Sensor_ID
-
-        Map<Long, SensorReading> sensorReadings = loadSensorReadingsFromCSV(dir, hz);
-
-        // Recorremos el CSV y cargamos los arboles a una lista local
-
-        List<String> lines = Files.readAllLines(Paths.get(dir + "/" + SENSORS_FILE_NAME), StandardCharsets.ISO_8859_1);
-
-        int sensorsLoaded = 0;
-        for(String line : lines) {
-            String[] values = line.split("[;]");
-
-            Sensor s = new Sensor(Status.valueOf(values[4]), values[2], values[1], Long.parseLong(values[0]));
-
-            if (sensorReadings.containsKey(s.getSensorId())) {
-                sensorReadings.get(s.getSensorId()).setSensor(s);
+        logWithTimeStamp(timestampWriter, "Inicio de la lectura del archivo");
+        List<String> lines = Files.readAllLines(
+                Paths.get(dir + "/" + SENSORS_FILE_NAME), StandardCharsets.ISO_8859_1);
+        lines.remove(0);
+        for (String line : lines) {
+            String[] values = line.split(";");
+            if(Status.valueOf(values[4]).equals(Status.A)) {
+                Sensor s = new Sensor(Status.valueOf(values[4]), values[1], Long.parseLong(values[0]));
+                sensorMap.put(s.getSensorId(),s);
             }
-
-            sensorsLoaded++;
         }
 
-        logger.info("{} sensors added", sensorsLoaded);
-
-
-//        IList<SensorReading> srDist = hz.getList("sensors_readings");
-//        srDist.clear();
-//        srDist.addAll(readings);
-
+        List<SensorReading> sensorReadings = loadSensorReadingsFromCSV(sensorMap, dir);
         logWithTimeStamp(timestampWriter, "Fin de la lectura del archivo");
+        IList<SensorReading> readingIList = hz.getList("g9_sensors_readings");
+        readingIList.clear();
+        readingIList.addAll(sensorReadings);
     }
 }

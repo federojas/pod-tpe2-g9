@@ -9,7 +9,7 @@ import com.hazelcast.mapreduce.Mapper;
 public class PedestriansBySensorMapper implements Mapper<String, SensorReading, String, Long>{
     @Override
     public void map(String key, SensorReading reading, Context<String, Long> context) {
-        if (reading.getSensor().getStatus().equals(Status.A))
-            context.emit(reading.getSensor().getSensorName(), reading.getHourlyCounts());
+        if (reading.getSensor() != null && reading.getSensor().getStatus().equals(Status.A))
+            context.emit(reading.getSensor().getDescription(), reading.getHourlyCounts());
     }
 }
