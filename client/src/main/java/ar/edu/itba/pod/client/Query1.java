@@ -29,7 +29,7 @@ public class Query1 {
         FileWriter logWriter = new FileWriter(logFile);
 
         HazelcastInstance hz = Utils.getHazelClientInstance(args);
-        Utils.loadSensorsFromCSV(args,hz,logWriter);
+        Utils.loadQuery1SensorsFromCSV(args,hz,logWriter);
         final KeyValueSource<String, Query1Reading> dataSource = KeyValueSource.fromList(
                 hz.getList("g9_sensors_readings"));
 
@@ -56,10 +56,10 @@ public class Query1 {
 
         csvWriter.write("Sensor;Total_Count\n");
 
-        result.forEach(e -> {
+        result.forEach(r -> {
             try {
-                csvWriter.write(e.getKey() + ";" + e.getValue() + "\n");
-            } catch (IOException err) {
+                csvWriter.write(r.getKey() + ";" + r.getValue() + "\n");
+            } catch (IOException exception) {
                 HazelcastClient.shutdownAll();
             }
         });

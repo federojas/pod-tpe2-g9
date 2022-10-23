@@ -1,6 +1,8 @@
 package ar.edu.itba.pod.models;
 
-public class Query2Reading {
+import java.io.Serializable;
+
+public class Query2Reading implements Serializable {
     private Long year;
     private String day;
     private Long readings;

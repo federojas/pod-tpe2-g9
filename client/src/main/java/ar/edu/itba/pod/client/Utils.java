@@ -1,6 +1,7 @@
 package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.models.Query1Reading;
+import ar.edu.itba.pod.models.Query2Reading;
 import ar.edu.itba.pod.models.Sensor;
 import ar.edu.itba.pod.models.Status;
 import com.hazelcast.client.HazelcastClient;
@@ -61,19 +62,19 @@ public final class Utils {
     }
 
 
-    public static void loadSensorReadingsFromCSV(Map<Long,Sensor> sensorMap, String dir, IList<Query1Reading> readingIList) throws IOException {
+    private static void loadQuery1SensorReadingsFromCSV(Map<Long,Sensor> sensorMap, String dir, IList<Query1Reading> readingIList) throws IOException {
         List<String> lines = Files.readAllLines(Paths.get(dir + "/" + READINGS_FILE_NAME), StandardCharsets.ISO_8859_1);
         lines.remove(0);
         for(String line : lines) {
             String[] values = line.split(";");
             if(sensorMap.containsKey(Long.parseLong(values[7]))) {
-                Query1Reading sr = new Query1Reading(values[8], Long.parseLong(values[9]));
+                Query1Reading sr = new Query1Reading(sensorMap.get(Long.parseLong(values[7])).getDescription(), Long.parseLong(values[9]));
                 readingIList.add(sr);
             }
         }
     }
 
-    public static void loadSensorsFromCSV(String[] args, HazelcastInstance hz, FileWriter timestampWriter) throws IOException {
+    public static void loadQuery1SensorsFromCSV(String[] args, HazelcastInstance hz, FileWriter timestampWriter) throws IOException {
         Map<Long, Sensor> sensorMap = new HashMap<>();
         String dir = parseParameter(args, "-DinPath");
 
@@ -92,9 +93,29 @@ public final class Utils {
         IList<Query1Reading> readingIList = hz.getList("g9_sensors_readings");
         readingIList.clear();
 
-        loadSensorReadingsFromCSV(sensorMap, dir, readingIList);
+        loadQuery1SensorReadingsFromCSV(sensorMap, dir, readingIList);
         logWithTimeStamp(timestampWriter, "Fin de la lectura del archivo");
+    }
 
 
+
+    public static void loadQuery2ReadingsFromCSV(String[] args, HazelcastInstance hz, FileWriter timestampWriter) throws IOException {
+        String dir = parseParameter(args, "-DinPath");
+
+        logWithTimeStamp(timestampWriter, "Inicio de la lectura del archivo");
+        List<String> lines = Files.readAllLines(
+                Paths.get(dir + "/" + READINGS_FILE_NAME), StandardCharsets.ISO_8859_1);
+
+        IList<Query2Reading> readingIList = hz.getList("g9_sensors_readings");
+        readingIList.clear();
+
+        lines.remove(0);
+        for(String line : lines) {
+            String[] values = line.split(";");
+                Query2Reading sr = new Query2Reading(Long.parseLong(values[2]), values[5], Long.parseLong(values[9]));
+                readingIList.add(sr);
+        }
+
+        logWithTimeStamp(timestampWriter, "Fin de la lectura del archivo");
     }
 }
