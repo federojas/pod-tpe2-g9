@@ -122,6 +122,30 @@ public final class Utils {
         logWithTimeStamp(timestampWriter, "Fin de la lectura del archivo");
     }
 
+    public static void loadQuery4ReadingsFromCSV(String[] args, HazelcastInstance hz, FileWriter timestampWriter, Long year) throws IOException {
+        String dir = beginCSVLoad(args, timestampWriter);
+        List<String> sensorLines = prepareCSVLoad(SENSORS_FILE_NAME, dir);
+
+        Map<Long, Sensor> sensorMap = getActiveSensors(sensorLines);
+
+        List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
+
+        IList<Query4Reading> readingIList = hz.getList("g9_sensors_readings");
+        readingIList.clear();
+
+        for(String line : lines) {
+            String[] values = line.split(";");
+            if(sensorMap.containsKey(Long.parseLong(values[7])) && Long.parseLong(values[2]) == year) {
+                Query4Reading sr = new Query4Reading(Long.parseLong(values[9]),
+                        values[3],
+                        sensorMap.get(Long.parseLong(values[7])).getDescription()
+                );
+                readingIList.add(sr);
+            }
+        }
+        logWithTimeStamp(timestampWriter, "Fin de la lectura del archivo");
+    }
+
     private static String beginCSVLoad(String[] args, FileWriter timestampWriter) throws IOException {
         String dir = parseParameter(args, "-DinPath");
         logWithTimeStamp(timestampWriter, "Inicio de la lectura del archivo");
@@ -146,5 +170,6 @@ public final class Utils {
         return sensorMap;
     }
 
+    private
 
 }
