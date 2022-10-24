@@ -14,11 +14,9 @@ import com.hazelcast.mapreduce.KeyValueSource;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static ar.edu.itba.pod.client.Utils.*;
 
@@ -31,7 +29,7 @@ public class Query1 {
         FileWriter logWriter = new FileWriter(logFile);
 
         HazelcastInstance hz = Utils.getHazelClientInstance(args);
-        Utils.loadQuery1SensorsFromCSV(args,hz,logWriter);
+        Utils.loadQuery1ReadingsFromCSV(args,hz,logWriter);
         final KeyValueSource<String, Query1Reading> dataSource = KeyValueSource.fromList(
                 hz.getList("g9_sensors_readings"));
 

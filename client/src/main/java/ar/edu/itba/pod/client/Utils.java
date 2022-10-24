@@ -58,7 +58,15 @@ public final class Utils {
         logWriter.write(timestamp + " - " + message + "\n");
     }
 
-    private static void loadQuery1SensorReadingsFromCSV(Map<Long,Sensor> sensorMap, String dir, IList<Query1Reading> readingIList) throws IOException {
+    public static void loadQuery1ReadingsFromCSV(String[] args, HazelcastInstance hz, FileWriter timestampWriter) throws IOException {
+        String dir = beginCSVLoad(args, timestampWriter);
+        List<String> sensorLines = prepareCSVLoad(SENSORS_FILE_NAME, dir);
+
+        Map<Long, Sensor> sensorMap = getActiveSensors(sensorLines);
+
+        IList<Query1Reading> readingIList = hz.getList("g9_sensors_readings");
+        readingIList.clear();
+
         List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
         for(String line : lines) {
             String[] values = line.split(";");
@@ -67,22 +75,9 @@ public final class Utils {
                 readingIList.add(sr);
             }
         }
-    }
 
-    public static void loadQuery1SensorsFromCSV(String[] args, HazelcastInstance hz, FileWriter timestampWriter) throws IOException {
-        String dir = beginCSVLoad(args, timestampWriter);
-        List<String> lines = prepareCSVLoad(SENSORS_FILE_NAME, dir);
-
-        Map<Long, Sensor> sensorMap = getActiveSensors(lines);
-
-        IList<Query1Reading> readingIList = hz.getList("g9_sensors_readings");
-        readingIList.clear();
-
-        loadQuery1SensorReadingsFromCSV(sensorMap, dir, readingIList);
         logWithTimeStamp(timestampWriter, "Fin de la lectura del archivo");
     }
-
-
 
     public static void loadQuery2ReadingsFromCSV(String[] args, HazelcastInstance hz, FileWriter timestampWriter) throws IOException {
         String dir = beginCSVLoad(args, timestampWriter);
@@ -150,4 +145,6 @@ public final class Utils {
         }
         return sensorMap;
     }
+
+
 }
