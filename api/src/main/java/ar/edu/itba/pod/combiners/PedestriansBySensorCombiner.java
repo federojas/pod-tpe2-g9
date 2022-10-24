@@ -10,7 +10,7 @@ public class PedestriansBySensorCombiner<K> implements CombinerFactory<K, Long, 
             return new PedestriansBySensorCombinerImpl();
         }
 
-        static class PedestriansBySensorCombinerImpl extends Combiner<Long, Long> {
+        private static class PedestriansBySensorCombinerImpl extends Combiner<Long, Long> {
             private long pedestrianCount = 0;
 
             @Override
