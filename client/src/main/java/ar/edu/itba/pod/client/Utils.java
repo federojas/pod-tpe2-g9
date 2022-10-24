@@ -58,10 +58,8 @@ public final class Utils {
         logWriter.write(timestamp + " - " + message + "\n");
     }
 
-
     private static void loadQuery1SensorReadingsFromCSV(Map<Long,Sensor> sensorMap, String dir, IList<Query1Reading> readingIList) throws IOException {
-        List<String> lines = Files.readAllLines(Paths.get(dir + "/" + READINGS_FILE_NAME), StandardCharsets.ISO_8859_1);
-        lines.remove(0);
+        List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
         for(String line : lines) {
             String[] values = line.split(";");
             if(sensorMap.containsKey(Long.parseLong(values[7]))) {
@@ -72,20 +70,10 @@ public final class Utils {
     }
 
     public static void loadQuery1SensorsFromCSV(String[] args, HazelcastInstance hz, FileWriter timestampWriter) throws IOException {
-        Map<Long, Sensor> sensorMap = new HashMap<>();
-        String dir = parseParameter(args, "-DinPath");
+        String dir = beginCSVLoad(args, timestampWriter);
+        List<String> lines = prepareCSVLoad(SENSORS_FILE_NAME, dir);
 
-        logWithTimeStamp(timestampWriter, "Inicio de la lectura del archivo");
-        List<String> lines = Files.readAllLines(
-                Paths.get(dir + "/" + SENSORS_FILE_NAME), StandardCharsets.ISO_8859_1);
-        lines.remove(0);
-        for (String line : lines) {
-            String[] values = line.split(";");
-            if(Status.valueOf(values[4]).equals(Status.A)) {
-                Sensor s = new Sensor(Status.valueOf(values[4]), values[1], Long.parseLong(values[0]));
-                sensorMap.put(s.getSensorId(), s);
-            }
-        }
+        Map<Long, Sensor> sensorMap = getActiveSensors(lines);
 
         IList<Query1Reading> readingIList = hz.getList("g9_sensors_readings");
         readingIList.clear();
@@ -97,16 +85,12 @@ public final class Utils {
 
 
     public static void loadQuery2ReadingsFromCSV(String[] args, HazelcastInstance hz, FileWriter timestampWriter) throws IOException {
-        String dir = parseParameter(args, "-DinPath");
-
-        logWithTimeStamp(timestampWriter, "Inicio de la lectura del archivo");
-        List<String> lines = Files.readAllLines(
-                Paths.get(dir + "/" + READINGS_FILE_NAME), StandardCharsets.ISO_8859_1);
+        String dir = beginCSVLoad(args, timestampWriter);
+        List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
 
         IList<Query2Reading> readingIList = hz.getList("g9_sensors_readings");
         readingIList.clear();
 
-        lines.remove(0);
         for(String line : lines) {
             String[] values = line.split(";");
                 Query2Reading sr = new Query2Reading(Long.parseLong(values[2]), values[5], Long.parseLong(values[9]));
@@ -117,28 +101,16 @@ public final class Utils {
     }
 
     public static void loadQuery3ReadingsFromCSV(String[] args, HazelcastInstance hz, FileWriter timestampWriter, String min) throws IOException {
-        String dir = parseParameter(args, "-DinPath");
-        Map<Long, Sensor> sensorMap = new HashMap<>();
-        logWithTimeStamp(timestampWriter, "Inicio de la lectura del archivo");
+        String dir = beginCSVLoad(args, timestampWriter);
+        List<String> sensorLines = prepareCSVLoad(SENSORS_FILE_NAME, dir);
 
-        List<String> sensorLines = Files.readAllLines(
-                Paths.get(dir + "/" + SENSORS_FILE_NAME), StandardCharsets.ISO_8859_1);
-        sensorLines.remove(0);
-        for (String line : sensorLines) {
-            String[] values = line.split(";");
-            if(Status.valueOf(values[4]).equals(Status.A)) {
-                Sensor s = new Sensor(Status.valueOf(values[4]), values[1], Long.parseLong(values[0]));
-                sensorMap.put(s.getSensorId(), s);
-            }
-        }
+        Map<Long, Sensor> sensorMap = getActiveSensors(sensorLines);
 
-        List<String> lines = Files.readAllLines(
-                Paths.get(dir + "/" + READINGS_FILE_NAME), StandardCharsets.ISO_8859_1);
+        List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
 
         IList<Query3Reading> readingIList = hz.getList("g9_sensors_readings");
         readingIList.clear();
 
-        lines.remove(0);
         for(String line : lines) {
             String[] values = line.split(";");
             if(sensorMap.containsKey(Long.parseLong(values[7])) && Long.parseLong(values[9]) > Long.parseLong(min)) {
@@ -155,4 +127,27 @@ public final class Utils {
         logWithTimeStamp(timestampWriter, "Fin de la lectura del archivo");
     }
 
+    private static String beginCSVLoad(String[] args, FileWriter timestampWriter) throws IOException {
+        String dir = parseParameter(args, "-DinPath");
+        logWithTimeStamp(timestampWriter, "Inicio de la lectura del archivo");
+        return dir;
+    }
+
+    private static List<String> prepareCSVLoad(String file, String dir) throws IOException {
+        List<String> lines = Files.readAllLines(Paths.get(dir + "/" + file), StandardCharsets.ISO_8859_1);
+        lines.remove(0);
+        return lines;
+    }
+
+    private static Map<Long, Sensor> getActiveSensors(List<String> sensorLines) {
+        Map<Long, Sensor> sensorMap = new HashMap<>();
+        for (String line : sensorLines) {
+            String[] values = line.split(";");
+            if(Status.valueOf(values[4]).equals(Status.A)) {
+                Sensor s = new Sensor(Status.valueOf(values[4]), values[1], Long.parseLong(values[0]));
+                sensorMap.put(s.getSensorId(), s);
+            }
+        }
+        return sensorMap;
+    }
 }
