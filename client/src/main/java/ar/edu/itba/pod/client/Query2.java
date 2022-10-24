@@ -2,7 +2,7 @@ package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.collators.PedestriansPerYearCollator;
 import ar.edu.itba.pod.mappers.PedestriansPerYearMapper;
-import ar.edu.itba.pod.models.Query2Reading;
+import ar.edu.itba.pod.models.DayReading;
 import ar.edu.itba.pod.models.YearCount;
 import ar.edu.itba.pod.reducers.PedestriansPerYearReducer;
 import com.hazelcast.client.HazelcastClient;
@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
-import static ar.edu.itba.pod.client.Utils.logWithTimeStamp;
-import static ar.edu.itba.pod.client.Utils.parseParameter;
+import static ar.edu.itba.pod.client.QueryUtils.logWithTimeStamp;
+import static ar.edu.itba.pod.client.QueryUtils.parseParameter;
 
 public class Query2 {
 
@@ -29,16 +29,16 @@ public class Query2 {
         logFile.createNewFile();
         FileWriter logWriter = new FileWriter(logFile);
 
-        HazelcastInstance hz = Utils.getHazelClientInstance(args);
-        Utils.loadQuery2ReadingsFromCSV(args,hz,logWriter);
-        final KeyValueSource<String, Query2Reading> dataSource = KeyValueSource.fromList(
+        HazelcastInstance hz = QueryUtils.getHazelClientInstance(args);
+        QueryUtils.loadQuery2ReadingsFromCSV(args,hz,logWriter);
+        final KeyValueSource<String, DayReading> dataSource = KeyValueSource.fromList(
                 hz.getList("g9_sensors_readings"));
 
 
         logWithTimeStamp(logWriter, "Inicio del trabajo map/reduce");
 
         JobTracker jt = hz.getJobTracker("g9_jobs");
-        Job<String, Query2Reading> job = jt.newJob(dataSource);
+        Job<String, DayReading> job = jt.newJob(dataSource);
 
         ICompletableFuture<Stream<Map.Entry<Long, YearCount>>> future = job
                 .mapper(new PedestriansPerYearMapper())
@@ -67,6 +67,4 @@ public class Query2 {
         csvWriter.close();
         HazelcastClient.shutdownAll();
     }
-
-
 }

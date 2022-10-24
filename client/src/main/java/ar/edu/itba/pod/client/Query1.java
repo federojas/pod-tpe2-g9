@@ -3,7 +3,7 @@ package ar.edu.itba.pod.client;
 import ar.edu.itba.pod.collators.PedestriansPerSensorCollator;
 import ar.edu.itba.pod.combiners.PedestriansBySensorCombiner;
 import ar.edu.itba.pod.mappers.PedestriansBySensorMapper;
-import ar.edu.itba.pod.models.Query1Reading;
+import ar.edu.itba.pod.models.SensorReading;
 import ar.edu.itba.pod.reducers.PedestriansBySensorReducer;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.core.HazelcastInstance;
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
-import static ar.edu.itba.pod.client.Utils.*;
+import static ar.edu.itba.pod.client.QueryUtils.*;
 
 public class Query1 {
 
@@ -28,16 +28,16 @@ public class Query1 {
         logFile.createNewFile();
         FileWriter logWriter = new FileWriter(logFile);
 
-        HazelcastInstance hz = Utils.getHazelClientInstance(args);
-        Utils.loadQuery1ReadingsFromCSV(args,hz,logWriter);
-        final KeyValueSource<String, Query1Reading> dataSource = KeyValueSource.fromList(
+        HazelcastInstance hz = QueryUtils.getHazelClientInstance(args);
+        QueryUtils.loadQuery1ReadingsFromCSV(args,hz,logWriter);
+        final KeyValueSource<String, SensorReading> dataSource = KeyValueSource.fromList(
                 hz.getList("g9_sensors_readings"));
 
 
         logWithTimeStamp(logWriter, "Inicio del trabajo map/reduce");
 
         JobTracker jt = hz.getJobTracker("g9_jobs");
-        Job<String, Query1Reading> job = jt.newJob(dataSource);
+        Job<String, SensorReading> job = jt.newJob(dataSource);
 
         ICompletableFuture<Stream<Map.Entry<String, Long>>> future = job
                 .mapper(new PedestriansBySensorMapper())

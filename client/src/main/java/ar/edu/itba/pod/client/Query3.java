@@ -2,7 +2,7 @@ package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.collators.MaxMeasurePerSensorCollator;
 import ar.edu.itba.pod.mappers.MaxMeasurePerSensorMapper;
-import ar.edu.itba.pod.models.Query3Reading;
+import ar.edu.itba.pod.models.DateTimeReading;
 import ar.edu.itba.pod.models.FeasibleMaxMeasure;
 import ar.edu.itba.pod.reducers.MaxMeasurePerSensorReducer;
 import com.hazelcast.client.HazelcastClient;
@@ -20,8 +20,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
-import static ar.edu.itba.pod.client.Utils.logWithTimeStamp;
-import static ar.edu.itba.pod.client.Utils.parseParameter;
+import static ar.edu.itba.pod.client.QueryUtils.logWithTimeStamp;
+import static ar.edu.itba.pod.client.QueryUtils.parseParameter;
 
 public class Query3 {
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
@@ -29,16 +29,16 @@ public class Query3 {
         logFile.createNewFile();
         FileWriter logWriter = new FileWriter(logFile);
 
-        HazelcastInstance hz = Utils.getHazelClientInstance(args);
-        Utils.loadQuery3ReadingsFromCSV(args,hz,logWriter, parseParameter(args,"-Dmin"));
-        final KeyValueSource<String, Query3Reading> dataSource = KeyValueSource.fromList(
+        HazelcastInstance hz = QueryUtils.getHazelClientInstance(args);
+        QueryUtils.loadQuery3ReadingsFromCSV(args,hz,logWriter, parseParameter(args,"-Dmin"));
+        final KeyValueSource<String, DateTimeReading> dataSource = KeyValueSource.fromList(
                 hz.getList("g9_sensors_readings"));
 
 
         logWithTimeStamp(logWriter, "Inicio del trabajo map/reduce");
 
         JobTracker jt = hz.getJobTracker("g9_jobs");
-        Job<String, Query3Reading> job = jt.newJob(dataSource);
+        Job<String, DateTimeReading> job = jt.newJob(dataSource);
 
         ICompletableFuture<Stream<Map.Entry<String, FeasibleMaxMeasure>>> future = job
                 .mapper(new MaxMeasurePerSensorMapper())

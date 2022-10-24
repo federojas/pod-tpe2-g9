@@ -3,7 +3,7 @@ package ar.edu.itba.pod.client;
 import ar.edu.itba.pod.collators.AverageMeasurePerMonthCollator;
 import ar.edu.itba.pod.mappers.AverageMeasurePerMonthMapper;
 import ar.edu.itba.pod.models.MonthAverage;
-import ar.edu.itba.pod.models.Query4Reading;
+import ar.edu.itba.pod.models.SensorMonthReading;
 import ar.edu.itba.pod.reducers.AverageMeasurePerMonthReducer;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.core.HazelcastInstance;
@@ -19,8 +19,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
-import static ar.edu.itba.pod.client.Utils.logWithTimeStamp;
-import static ar.edu.itba.pod.client.Utils.parseParameter;
+import static ar.edu.itba.pod.client.QueryUtils.logWithTimeStamp;
+import static ar.edu.itba.pod.client.QueryUtils.parseParameter;
 
 //TODO CODIGO REPETIDO EN LAS QUERYS
 public class Query4 {
@@ -29,15 +29,15 @@ public class Query4 {
         logFile.createNewFile();
         FileWriter logWriter = new FileWriter(logFile);
 
-        HazelcastInstance hz = Utils.getHazelClientInstance(args);
-        Utils.loadQuery4ReadingsFromCSV(args,hz,logWriter, Long.parseLong(parseParameter(args,"-Dyear")));
-        final KeyValueSource<String, Query4Reading> dataSource = KeyValueSource.fromList(
+        HazelcastInstance hz = QueryUtils.getHazelClientInstance(args);
+        QueryUtils.loadQuery4ReadingsFromCSV(args,hz,logWriter, Long.parseLong(parseParameter(args,"-Dyear")));
+        final KeyValueSource<String, SensorMonthReading> dataSource = KeyValueSource.fromList(
                 hz.getList("g9_sensors_readings"));
 
         logWithTimeStamp(logWriter, "Inicio del trabajo map/reduce");
 
         JobTracker jt = hz.getJobTracker("g9_jobs");
-        Job<String, Query4Reading> job = jt.newJob(dataSource);
+        Job<String, SensorMonthReading> job = jt.newJob(dataSource);
 
         ICompletableFuture<Stream<Map.Entry<String, MonthAverage>>> future = job
                 .mapper(new AverageMeasurePerMonthMapper())

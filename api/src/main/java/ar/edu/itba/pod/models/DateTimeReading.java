@@ -2,7 +2,7 @@ package ar.edu.itba.pod.models;
 
 import java.io.Serializable;
 
-public class Query3Reading implements Serializable {
+public class DateTimeReading implements Serializable {
     private final Long readings;
     private final Long year;
     private final String month;
@@ -10,7 +10,7 @@ public class Query3Reading implements Serializable {
     private final Integer time;
     private final String sensorName;
 
-    public Query3Reading(Long readings, Long year, String month, Integer day, Integer time, String sensorName) {
+    public DateTimeReading(Long readings, Long year, String month, Integer day, Integer time, String sensorName) {
         this.readings = readings;
         this.year = year;
         this.month = month;

@@ -2,13 +2,13 @@ package ar.edu.itba.pod.models;
 
 import java.io.Serializable;
 
-public class Query2Reading implements Serializable {
-    private Long year;
-    private String day;
-    private Long readings;
+public class DayReading implements Serializable {
+    private final Long year;
+    private final String day;
+    private final Long readings;
 
 
-    public Query2Reading(Long year, String day, Long readings) {
+    public DayReading(Long year, String day, Long readings) {
         this.year = year;
         this.day = day;
         this.readings = readings;

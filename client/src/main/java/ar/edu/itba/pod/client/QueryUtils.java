@@ -19,12 +19,12 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
-public final class Utils {
+public final class QueryUtils {
 
     public static final String SENSORS_FILE_NAME = "sensors.csv";
     public static final String READINGS_FILE_NAME = "readings.csv";
 
-    private Utils() {
+    private QueryUtils() {
 
     }
 
@@ -62,16 +62,16 @@ public final class Utils {
         String dir = beginCSVLoad(args, timestampWriter);
         List<String> sensorLines = prepareCSVLoad(SENSORS_FILE_NAME, dir);
 
-        Map<Long, Sensor> sensorMap = getActiveSensors(sensorLines);
+        Map<Long, ActiveSensor> sensorMap = getActiveSensors(sensorLines);
 
-        IList<Query1Reading> readingIList = hz.getList("g9_sensors_readings");
+        IList<SensorReading> readingIList = hz.getList("g9_sensors_readings");
         readingIList.clear();
 
         List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
         for(String line : lines) {
             String[] values = line.split(";");
             if(sensorMap.containsKey(Long.parseLong(values[7]))) {
-                Query1Reading sr = new Query1Reading(sensorMap.get(Long.parseLong(values[7])).getDescription(), Long.parseLong(values[9]));
+                SensorReading sr = new SensorReading(sensorMap.get(Long.parseLong(values[7])).getDescription(), Long.parseLong(values[9]));
                 readingIList.add(sr);
             }
         }
@@ -83,12 +83,12 @@ public final class Utils {
         String dir = beginCSVLoad(args, timestampWriter);
         List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
 
-        IList<Query2Reading> readingIList = hz.getList("g9_sensors_readings");
+        IList<DayReading> readingIList = hz.getList("g9_sensors_readings");
         readingIList.clear();
 
         for(String line : lines) {
             String[] values = line.split(";");
-                Query2Reading sr = new Query2Reading(Long.parseLong(values[2]), values[5], Long.parseLong(values[9]));
+                DayReading sr = new DayReading(Long.parseLong(values[2]), values[5], Long.parseLong(values[9]));
                 readingIList.add(sr);
         }
 
@@ -99,17 +99,17 @@ public final class Utils {
         String dir = beginCSVLoad(args, timestampWriter);
         List<String> sensorLines = prepareCSVLoad(SENSORS_FILE_NAME, dir);
 
-        Map<Long, Sensor> sensorMap = getActiveSensors(sensorLines);
+        Map<Long, ActiveSensor> sensorMap = getActiveSensors(sensorLines);
 
         List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
 
-        IList<Query3Reading> readingIList = hz.getList("g9_sensors_readings");
+        IList<DateTimeReading> readingIList = hz.getList("g9_sensors_readings");
         readingIList.clear();
 
         for(String line : lines) {
             String[] values = line.split(";");
             if(sensorMap.containsKey(Long.parseLong(values[7])) && Long.parseLong(values[9]) > Long.parseLong(min)) {
-                Query3Reading sr = new Query3Reading(Long.parseLong(values[9]),
+                DateTimeReading sr = new DateTimeReading(Long.parseLong(values[9]),
                         Long.parseLong(values[2]),
                         values[3],
                         Integer.parseInt(values[4]),
@@ -126,17 +126,17 @@ public final class Utils {
         String dir = beginCSVLoad(args, timestampWriter);
         List<String> sensorLines = prepareCSVLoad(SENSORS_FILE_NAME, dir);
 
-        Map<Long, Sensor> sensorMap = getActiveSensors(sensorLines);
+        Map<Long, ActiveSensor> sensorMap = getActiveSensors(sensorLines);
 
         List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
 
-        IList<Query4Reading> readingIList = hz.getList("g9_sensors_readings");
+        IList<SensorMonthReading> readingIList = hz.getList("g9_sensors_readings");
         readingIList.clear();
 
         for(String line : lines) {
             String[] values = line.split(";");
             if(sensorMap.containsKey(Long.parseLong(values[7])) && Long.parseLong(values[2]) == year) {
-                Query4Reading sr = new Query4Reading(Long.parseLong(values[9]),
+                SensorMonthReading sr = new SensorMonthReading(Long.parseLong(values[9]),
                         values[3],
                         sensorMap.get(Long.parseLong(values[7])).getDescription()
                 );
@@ -158,12 +158,12 @@ public final class Utils {
         return lines;
     }
 
-    private static Map<Long, Sensor> getActiveSensors(List<String> sensorLines) {
-        Map<Long, Sensor> sensorMap = new HashMap<>();
+    private static Map<Long, ActiveSensor> getActiveSensors(List<String> sensorLines) {
+        Map<Long, ActiveSensor> sensorMap = new HashMap<>();
         for (String line : sensorLines) {
             String[] values = line.split(";");
             if(Status.valueOf(values[4]).equals(Status.A)) {
-                Sensor s = new Sensor(Status.valueOf(values[4]), values[1], Long.parseLong(values[0]));
+                ActiveSensor s = new ActiveSensor(values[1], Long.parseLong(values[0]));
                 sensorMap.put(s.getSensorId(), s);
             }
         }

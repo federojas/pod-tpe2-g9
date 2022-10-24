@@ -2,11 +2,11 @@ package ar.edu.itba.pod.models;
 
 import java.io.Serializable;
 
-public class Query1Reading implements Serializable {
-    private String sensorName;
-    private Long readings;
+public class SensorReading implements Serializable {
+    private final String sensorName;
+    private final Long readings;
 
-    public Query1Reading(String sensorName, Long readings) {
+    public SensorReading(String sensorName, Long readings) {
         this.sensorName = sensorName;
         this.readings = readings;
     }

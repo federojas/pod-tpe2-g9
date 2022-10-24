@@ -7,7 +7,7 @@ import ar.edu.itba.pod.combiners.SensorsPerMillionGroupCombiner;
 import ar.edu.itba.pod.mappers.PedestriansBySensorMapper;
 import ar.edu.itba.pod.mappers.SensorsPerMillionGroupMapper;
 import ar.edu.itba.pod.models.PairedSensors;
-import ar.edu.itba.pod.models.Query1Reading;
+import ar.edu.itba.pod.models.SensorReading;
 import ar.edu.itba.pod.reducers.PedestriansBySensorReducer;
 import ar.edu.itba.pod.reducers.SensorsPerMillionGroupReducer;
 import com.hazelcast.client.HazelcastClient;
@@ -26,8 +26,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
-import static ar.edu.itba.pod.client.Utils.logWithTimeStamp;
-import static ar.edu.itba.pod.client.Utils.parseParameter;
+import static ar.edu.itba.pod.client.QueryUtils.logWithTimeStamp;
+import static ar.edu.itba.pod.client.QueryUtils.parseParameter;
 
 public class Query5 {
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
@@ -35,16 +35,16 @@ public class Query5 {
         logFile.createNewFile();
         FileWriter logWriter = new FileWriter(logFile);
 
-        HazelcastInstance hz = Utils.getHazelClientInstance(args);
-        Utils.loadQuery1ReadingsFromCSV(args, hz, logWriter);
-        final KeyValueSource<String, Query1Reading> dataSource = KeyValueSource.fromList(
+        HazelcastInstance hz = QueryUtils.getHazelClientInstance(args);
+        QueryUtils.loadQuery1ReadingsFromCSV(args, hz, logWriter);
+        final KeyValueSource<String, SensorReading> dataSource = KeyValueSource.fromList(
                 hz.getList("g9_sensors_readings"));
 
 
         logWithTimeStamp(logWriter, "Inicio del trabajo map/reduce");
 
         JobTracker jt = hz.getJobTracker("g9_jobs");
-        Job<String, Query1Reading> job = jt.newJob(dataSource);
+        Job<String, SensorReading> job = jt.newJob(dataSource);
 
         ICompletableFuture<Stream<Map.Entry<String, Long>>> future = job
                 .mapper(new PedestriansBySensorMapper())
