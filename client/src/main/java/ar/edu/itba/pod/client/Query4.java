@@ -1,15 +1,10 @@
 package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.collators.AverageMeasurePerMonthCollator;
-import ar.edu.itba.pod.collators.MaxMeasurePerSensorCollator;
 import ar.edu.itba.pod.mappers.AverageMeasurePerMonthMapper;
-import ar.edu.itba.pod.mappers.MaxMeasurePerSensorMapper;
-import ar.edu.itba.pod.models.FeasibleMaxMeasure;
 import ar.edu.itba.pod.models.MonthAverage;
-import ar.edu.itba.pod.models.Query3Reading;
 import ar.edu.itba.pod.models.Query4Reading;
 import ar.edu.itba.pod.reducers.AverageMeasurePerMonthReducer;
-import ar.edu.itba.pod.reducers.MaxMeasurePerSensorReducer;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ICompletableFuture;
@@ -20,8 +15,6 @@ import com.hazelcast.mapreduce.KeyValueSource;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
