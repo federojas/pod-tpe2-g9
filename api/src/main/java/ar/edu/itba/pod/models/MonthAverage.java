@@ -1,9 +1,11 @@
 package ar.edu.itba.pod.models;
 
-public class MonthAverage implements Comparable<MonthAverage> {
+import java.io.Serializable;
+
+public class MonthAverage implements Serializable, Comparable<MonthAverage> {
 
     private final String month;
-    private Double average;
+    private final Double average;
 
     public MonthAverage(String month, Double average) {
         this.month = month;

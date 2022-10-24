@@ -2,7 +2,7 @@ package ar.edu.itba.pod.models;
 
 import java.io.Serializable;
 
-public class MonthReading implements Serializable {
+public class MonthReading implements Serializable, Comparable<MonthReading> {
     private final String month;
     private Long readings;
 
@@ -16,7 +16,12 @@ public class MonthReading implements Serializable {
         this.readings = 0L;
     }
 
-    private enum daysInMonths {
+    @Override
+    public int compareTo(MonthReading monthReading) {
+        return this.getMonthAverage().compareTo(monthReading.getMonthAverage());
+    }
+
+    private enum DaysInMonths {
         JANUARY(31),
         FEBRUARY(28),
         MARCH(31),
@@ -32,7 +37,7 @@ public class MonthReading implements Serializable {
 
         private final int days;
 
-        daysInMonths(int days) {
+        DaysInMonths(int days) {
             this.days = days;
         }
 
@@ -54,6 +59,6 @@ public class MonthReading implements Serializable {
     }
 
     public Double getMonthAverage() {
-        return (double) readings / daysInMonths.valueOf(month.toUpperCase()).getDays();
+        return (double) readings / DaysInMonths.valueOf(month.toUpperCase()).getDays();
     }
 }
