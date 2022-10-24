@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static ar.edu.itba.pod.client.Utils.logWithTimeStamp;
 import static ar.edu.itba.pod.client.Utils.parseParameter;
