@@ -58,7 +58,7 @@ public class Query3 {
         result.forEach(r -> {
             try {
                 csvWriter.write(r.getKey() + ";" + r.getValue().getCount() + ";"
-                        + format.format(r.getValue().getDate()) + "\n");
+                        + format.format(r.getValue().getDate().getTime()) + "\n");
             } catch (IOException exception) {
                 HazelcastClient.shutdownAll();
             }
