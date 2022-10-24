@@ -31,12 +31,12 @@ import static ar.edu.itba.pod.client.Utils.parseParameter;
 
 public class Query5 {
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
-        File logFile = new File(parseParameter(args, "-DoutPath")+"/time5.txt");
+        File logFile = new File(parseParameter(args, "-DoutPath") + "/time5.txt");
         logFile.createNewFile();
         FileWriter logWriter = new FileWriter(logFile);
 
         HazelcastInstance hz = Utils.getHazelClientInstance(args);
-        Utils.loadQuery1ReadingsFromCSV(args,hz,logWriter);
+        Utils.loadQuery1ReadingsFromCSV(args, hz, logWriter);
         final KeyValueSource<String, Query1Reading> dataSource = KeyValueSource.fromList(
                 hz.getList("g9_sensors_readings"));
 
@@ -48,15 +48,20 @@ public class Query5 {
 
         ICompletableFuture<Stream<Map.Entry<String, Long>>> future = job
                 .mapper(new PedestriansBySensorMapper())
-                .combiner( new PedestriansBySensorCombiner<>() )
-                .reducer( new PedestriansBySensorReducer<>() )
+                .combiner(new PedestriansBySensorCombiner<>())
+                .reducer(new PedestriansBySensorReducer<>())
                 .submit(new PedestriansToMillionGroupCollator());
 
         Stream<Map.Entry<String, Long>> result = future.get();
 
         final IMap<String, Long> pedestriansPerSensorMap = hz.getMap("g9_pedestriansPerSensor");
         pedestriansPerSensorMap.clear();
-        result.forEach(r -> pedestriansPerSensorMap.put(r.getKey(), r.getValue()));
+        result.forEach(r -> {
+            String key = r.getKey();
+            Long value = r.getValue();
+            System.out.println(key + ": " + value);
+            pedestriansPerSensorMap.put(key, value);
+        });
 
         KeyValueSource<String, Long> dataSource2 = KeyValueSource.fromMap(pedestriansPerSensorMap);
 
@@ -77,6 +82,7 @@ public class Query5 {
 
         csvWriter.write("Group;Sensor A;Sensor B\n");
 
+        System.out.println("Size del keyset: " + result2.keySet().size());
         result2.keySet().forEach(group -> {
             for (PairedSensors pair : result2.get(group)) {
                 try {

@@ -11,10 +11,10 @@ public class PedestriansToMillionGroupCollator implements Collator<Map.Entry<Str
     @Override
     public Stream<Map.Entry<String, Long>> collate(Iterable<Map.Entry<String, Long>> iterable) {
         for (Map.Entry<String, Long> reading : iterable) {
-            reading.setValue((reading.getValue() % 1000000) * 1000000);
+            long group = reading.getValue() / 1000000L ;
+            if(group != 0)
+                reading.setValue(group * 1000000L);
         }
-        return StreamSupport.stream(iterable.spliterator(), false)
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed()
-                        .thenComparing(Map.Entry.comparingByKey()));
+        return StreamSupport.stream(iterable.spliterator(), false);
     }
 }
