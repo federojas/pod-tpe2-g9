@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.client;
 
+import ar.edu.itba.pod.collators.PedestriansPerSensorCollator;
 import ar.edu.itba.pod.combiners.PedestriansBySensorCombiner;
 import ar.edu.itba.pod.mappers.PedestriansBySensorMapper;
 import ar.edu.itba.pod.models.Query1Reading;
@@ -13,6 +14,7 @@ import com.hazelcast.mapreduce.KeyValueSource;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
@@ -43,11 +45,8 @@ public class Query1 {
                 .mapper(new PedestriansBySensorMapper())
                 .combiner( new PedestriansBySensorCombiner<>() )
                 .reducer( new PedestriansBySensorReducer<>() )
-                .submit((values) ->
-                        StreamSupport.stream(values.spliterator(), false)
-                                .sorted(Map.Entry.<String, Long>comparingByValue().reversed()
-                                        .thenComparing(Map.Entry.comparingByKey()))
-                );
+                .submit(new PedestriansPerSensorCollator());
+
         Stream<Map.Entry<String, Long>> result = future.get();
 
         File csvFile = new File(parseParameter(args, "-DoutPath")+"/query1.csv");

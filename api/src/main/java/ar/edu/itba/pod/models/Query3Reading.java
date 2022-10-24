@@ -3,25 +3,43 @@ package ar.edu.itba.pod.models;
 import java.io.Serializable;
 
 public class Query3Reading implements Serializable {
-    private final String sensorName;
     private final Long readings;
-    private final String dateTime;
+    private final Long year;
+    private final String month;
+    private final Integer day;
+    private final Integer time;
+    private final String sensorName;
 
-    public Query3Reading(String sensorName, Long readings, String dateTime) {
-        this.sensorName = sensorName;
+    public Query3Reading(Long readings, Long year, String month, Integer day, Integer time, String sensorName) {
         this.readings = readings;
-        this.dateTime = dateTime;
-    }
-
-    public String getSensorName() {
-        return sensorName;
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        this.time = time;
+        this.sensorName = sensorName;
     }
 
     public Long getReadings() {
         return readings;
     }
 
-    public String getDateTime() {
-        return dateTime;
+    public Long getYear() {
+        return year;
+    }
+
+    public String getMonth() {
+        return month;
+    }
+
+    public Integer getDay() {
+        return day;
+    }
+
+    public Integer getTime() {
+        return time;
+    }
+
+    public String getSensorName() {
+        return sensorName;
     }
 }

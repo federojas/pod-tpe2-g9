@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.client;
 
+import ar.edu.itba.pod.collators.PedestriansPerYearCollator;
 import ar.edu.itba.pod.mappers.PedestriansPerYearMapper;
 import ar.edu.itba.pod.models.Query2Reading;
 import ar.edu.itba.pod.models.YearCount;
@@ -43,9 +44,7 @@ public class Query2 {
         ICompletableFuture<Stream<Map.Entry<Long, YearCount>>> future = job
                 .mapper(new PedestriansPerYearMapper())
                 .reducer( new PedestriansPerYearReducer<>() )
-                .submit((values) ->
-                        StreamSupport.stream(values.spliterator(), false)
-                                .sorted(Map.Entry.<Long, YearCount>comparingByKey().reversed()));
+                .submit(new PedestriansPerYearCollator());
         Stream<Map.Entry<Long, YearCount>> result = future.get();
 
         File csvFile = new File(parseParameter(args, "-DoutPath")+"/query2.csv");

@@ -142,13 +142,17 @@ public final class Utils {
         for(String line : lines) {
             String[] values = line.split(";");
             if(sensorMap.containsKey(Long.parseLong(values[7])) && Long.parseLong(values[9]) > Long.parseLong(min)) {
-                Query3Reading sr = new Query3Reading(sensorMap.get(Long.parseLong(values[7])).getDescription()
-                        , Long.parseLong(values[9]), values[1] );
+                Query3Reading sr = new Query3Reading(Long.parseLong(values[9]),
+                        Long.parseLong(values[2]),
+                        values[3],
+                        Integer.parseInt(values[4]),
+                        Integer.parseInt(values[5]),
+                        sensorMap.get(Long.parseLong(values[7])).getDescription()
+                        );
                 readingIList.add(sr);
             }
         }
         logWithTimeStamp(timestampWriter, "Fin de la lectura del archivo");
     }
-
 
 }

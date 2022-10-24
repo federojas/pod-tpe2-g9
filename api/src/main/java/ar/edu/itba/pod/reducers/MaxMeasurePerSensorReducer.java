@@ -1,33 +1,43 @@
 package ar.edu.itba.pod.reducers;
 
-import ar.edu.itba.pod.models.SensorMeasure;
+import ar.edu.itba.pod.models.FeasibleMaxMeasure;
 import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;
 
-public class MaxMeasurePerSensorReducer <K> implements ReducerFactory<K, SensorMeasure, SensorMeasure> {
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
+public class MaxMeasurePerSensorReducer <K> implements ReducerFactory<K, FeasibleMaxMeasure, FeasibleMaxMeasure> {
     @Override
-    public Reducer<SensorMeasure, SensorMeasure> newReducer(K key) {
+    public Reducer<FeasibleMaxMeasure, FeasibleMaxMeasure> newReducer(K key) {
         return new MaxMeasurePerSensorReducerImp();
     }
 
-    private static class MaxMeasurePerSensorReducerImp extends Reducer<SensorMeasure, SensorMeasure> {
-        private volatile SensorMeasure sensorMeasure;
+    private static class MaxMeasurePerSensorReducerImp extends Reducer<FeasibleMaxMeasure, FeasibleMaxMeasure> {
+        private volatile FeasibleMaxMeasure feasibleMaxMeasure;
 
         @Override
         public void beginReduce() {
-            sensorMeasure = new SensorMeasure(0L,"-");
+            feasibleMaxMeasure = new FeasibleMaxMeasure();
         }
 
         @Override
-        public void reduce(SensorMeasure value) {
-            // TODO: Desempate por date time
-            if(value.getCount() > sensorMeasure.getCount())
-                sensorMeasure = value;
+        public void reduce(FeasibleMaxMeasure value) {
+            if(value.getCount() > feasibleMaxMeasure.getCount())
+                feasibleMaxMeasure = value;
+            else if(value.getCount().equals(feasibleMaxMeasure.getCount())) {
+                if(value.getDate().after(feasibleMaxMeasure.getDate()))
+                    feasibleMaxMeasure = value;
+            }
         }
 
         @Override
-        public SensorMeasure finalizeReduce() {
-            return sensorMeasure;
+        public FeasibleMaxMeasure finalizeReduce() {
+            return feasibleMaxMeasure;
         }
+
+
     }
 }

@@ -1,13 +1,10 @@
 package ar.edu.itba.pod.client;
 
+import ar.edu.itba.pod.collators.MaxMeasurePerSensorCollator;
 import ar.edu.itba.pod.mappers.MaxMeasurePerSensorMapper;
-import ar.edu.itba.pod.mappers.PedestriansPerYearMapper;
-import ar.edu.itba.pod.models.Query2Reading;
 import ar.edu.itba.pod.models.Query3Reading;
-import ar.edu.itba.pod.models.SensorMeasure;
-import ar.edu.itba.pod.models.YearCount;
+import ar.edu.itba.pod.models.FeasibleMaxMeasure;
 import ar.edu.itba.pod.reducers.MaxMeasurePerSensorReducer;
-import ar.edu.itba.pod.reducers.PedestriansPerYearReducer;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ICompletableFuture;
@@ -18,6 +15,7 @@ import com.hazelcast.mapreduce.KeyValueSource;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
@@ -43,24 +41,24 @@ public class Query3 {
         JobTracker jt = hz.getJobTracker("g9_jobs");
         Job<String, Query3Reading> job = jt.newJob(dataSource);
 
-        ICompletableFuture<Stream<Map.Entry<String, SensorMeasure>>> future = job
+        ICompletableFuture<Stream<Map.Entry<String, FeasibleMaxMeasure>>> future = job
                 .mapper(new MaxMeasurePerSensorMapper())
                 .reducer( new MaxMeasurePerSensorReducer<>() )
-                .submit((values) ->
-                        StreamSupport.stream(values.spliterator(), false)
-                                .sorted(Map.Entry.<String, SensorMeasure>comparingByKey().reversed()));
-        Stream<Map.Entry<String, SensorMeasure>> result = future.get();
+                .submit(new MaxMeasurePerSensorCollator());
+
+        Stream<Map.Entry<String, FeasibleMaxMeasure>> result = future.get();
 
         File csvFile = new File(parseParameter(args, "-DoutPath")+"/query3.csv");
         csvFile.createNewFile();
         FileWriter csvWriter = new FileWriter(csvFile);
 
         csvWriter.write("Sensor;Max_Reading_Count;Max_Reading_DateTime\n");
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:00");
 
         result.forEach(r -> {
             try {
                 csvWriter.write(r.getKey() + ";" + r.getValue().getCount() + ";"
-                        + r.getValue().getDateTime() + "\n");
+                        + format.format(r.getValue().getDate()) + "\n");
             } catch (IOException exception) {
                 HazelcastClient.shutdownAll();
             }
