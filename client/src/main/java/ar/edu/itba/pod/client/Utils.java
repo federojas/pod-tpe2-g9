@@ -146,7 +146,7 @@ public final class Utils {
                         Long.parseLong(values[2]),
                         values[3],
                         Integer.parseInt(values[4]),
-                        Integer.parseInt(values[5]),
+                        Integer.parseInt(values[6]),
                         sensorMap.get(Long.parseLong(values[7])).getDescription()
                         );
                 readingIList.add(sr);
