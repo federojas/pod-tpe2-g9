@@ -13,6 +13,6 @@ cd ..
 cd client/target
 tar -xvf tpe2-g9-client-1.0-SNAPSHOT-bin.tar.gz
 cd tpe2-g9-client-1.0-SNAPSHOT
-chmod u+x query1
+chmod u+x query*
 
 

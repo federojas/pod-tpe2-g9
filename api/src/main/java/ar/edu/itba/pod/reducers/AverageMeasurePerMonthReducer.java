@@ -1,34 +1,41 @@
 package ar.edu.itba.pod.reducers;
 
+import ar.edu.itba.pod.models.MonthAverage;
 import ar.edu.itba.pod.models.MonthReading;
 import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;
 
-public class AverageMeasurePerMonthReducer<K> implements ReducerFactory<K, MonthReading, MonthReading> {
+import java.util.HashMap;
+import java.util.Map;
+
+public class AverageMeasurePerMonthReducer<K> implements ReducerFactory<K, MonthReading, MonthAverage> {
 
     @Override
-    public Reducer<MonthReading, MonthReading> newReducer(K k) {
+    public Reducer<MonthReading, MonthAverage> newReducer(K k) {
         return new AverageMeasurePerMonthReducerImpl();
     }
 
-    private static class AverageMeasurePerMonthReducerImpl extends Reducer<MonthReading, MonthReading> {
+    private static class AverageMeasurePerMonthReducerImpl extends Reducer<MonthReading, MonthAverage> {
 
-        private volatile MonthReading monthReading;
+        private volatile Map<String,MonthReading> monthReading;
 
         @Override
         public void reduce(MonthReading value) {
-            if(value.getMonth().equals(monthReading.getMonth()))
-                monthReading.setReadings(monthReading.getReadings() + value.getReadings());
+            monthReading.putIfAbsent(value.getMonth(), new MonthReading(value.getMonth(), 0L));
+            MonthReading old = monthReading.get(value.getMonth());
+            old.setReadings(old.getReadings() + value.getReadings());
         }
 
         @Override
         public void beginReduce() {
-            monthReading = new MonthReading();
+            monthReading = new HashMap<>(12);
         }
 
         @Override
-        public MonthReading finalizeReduce() {
-            return monthReading;
+        public MonthAverage finalizeReduce() {
+            MonthReading maxAverage = monthReading.values().stream().max(MonthReading::compareTo)
+                    .orElseThrow(IllegalStateException::new);
+            return new MonthAverage(maxAverage.getMonth(), maxAverage.getMonthAverage());
         }
     }
 }
