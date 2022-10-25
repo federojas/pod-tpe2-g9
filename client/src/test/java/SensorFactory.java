@@ -1,10 +1,17 @@
 import ar.edu.itba.pod.models.DateTimeReading;
+import ar.edu.itba.pod.models.DayReading;
 import ar.edu.itba.pod.models.FeasibleMaxMeasure;
 import ar.edu.itba.pod.models.SensorReading;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class SensorFactory {
+
+    public static final String[] days = {
+            "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+    };
     public static final String[] activeSensorNames = {
             "Sensor Villa Crespo",
             "Sensor Villa Luro",
@@ -62,6 +69,14 @@ public class SensorFactory {
                 new DateTimeReading(HIGHEST_COUNT, 2018L, "January", 1, 5, activeSensorNames[1]),
                 new DateTimeReading(HIGHEST_COUNT, 2018L, "January", 1, 6, activeSensorNames[2]),
         };
+    }
+
+    public static List<DayReading> getDayReadingList () {
+        List<DayReading> toReturn = new ArrayList<>();
+        for(int i = 0 ; i < 3 ; i++)
+            for(int j = 0 ; j < days.length ; j++)
+                toReturn.add(new DayReading((long) (2019 + i), days[j], (long) (Math.pow(10, i)*j)));
+        return toReturn;
     }
 
 
