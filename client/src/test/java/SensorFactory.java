@@ -118,4 +118,15 @@ public class SensorFactory {
                 activeSensorNames[3],
         };
     }
+
+    public static List<SensorReading> getQ5SensorReadingsList() {
+        List<SensorReading> sensorReadingsList = new ArrayList<>();
+        sensorReadingsList.add(new SensorReading(activeSensorNames[0], 2500000L));
+        sensorReadingsList.add(new SensorReading(activeSensorNames[1], 2000000L));
+        sensorReadingsList.add(new SensorReading(activeSensorNames[2], 3000000L));
+        sensorReadingsList.add(new SensorReading(activeSensorNames[3], 3200000L));
+        sensorReadingsList.add(new SensorReading(activeSensorNames[4], 1000000L));
+        sensorReadingsList.add(new SensorReading(activeSensorNames[5], 2999999L));
+        return sensorReadingsList;
+    }
 }

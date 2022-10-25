@@ -41,7 +41,7 @@ public class Q4Test extends QueryTest {
             ICompletableFuture<Stream<Map.Entry<String, MonthAverage>>> future = job
                     .mapper(new AverageMeasurePerMonthMapper())
                     .reducer(new AverageMeasurePerMonthReducer<>())
-                    .submit(new AverageMeasurePerMonthCollator(10L));
+                    .submit(new AverageMeasurePerMonthCollator(4L));
 
             Stream<Map.Entry<String, MonthAverage>> result = future.get();
             List<Map.Entry<String, MonthAverage>> l = result.collect(Collectors.toList());
@@ -52,8 +52,6 @@ public class Q4Test extends QueryTest {
                 assertEquals(expected.get(i).getValue().getMonth(), k.getValue().getMonth());
                 i++;
             }
-
-
         }
 
         private List<Pair<String,MonthAverage>> getExpectedResult(){
