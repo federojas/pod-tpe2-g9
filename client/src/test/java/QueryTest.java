@@ -9,8 +9,8 @@ import org.junit.Test;
 import java.util.Collections;
 
 public abstract class QueryTest {
-    private HazelcastInstance client, member;
-    private TestHazelcastFactory hzFactory;
+    protected HazelcastInstance client, member;
+    protected TestHazelcastFactory hzFactory;
 
     @Before
     public void setUp() {
