@@ -21,6 +21,7 @@ import com.hazelcast.mapreduce.KeyValueSource;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -86,7 +87,10 @@ public class Query5 {
         result2.keySet().forEach(group -> {
             for (PairedSensors pair : result2.get(group)) {
                 try {
-                    csvWriter.write(group + ";" + pair.getSensorA() + ";"
+                    DecimalFormat decimalFormat = new DecimalFormat("#,###,###");
+                    String formattedGroup = decimalFormat.format(group);
+                    formattedGroup = formattedGroup.replace(',','.');
+                    csvWriter.write(formattedGroup + ";" + pair.getSensorA() + ";"
                             + pair.getSensorB() + "\n");
                 } catch (IOException exception) {
                     HazelcastClient.shutdownAll();
