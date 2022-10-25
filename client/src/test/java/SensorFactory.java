@@ -1,7 +1,4 @@
-import ar.edu.itba.pod.models.DateTimeReading;
-import ar.edu.itba.pod.models.DayReading;
-import ar.edu.itba.pod.models.FeasibleMaxMeasure;
-import ar.edu.itba.pod.models.SensorReading;
+import ar.edu.itba.pod.models.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +8,11 @@ public class SensorFactory {
 
     public static final String[] days = {
             "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+    };
+
+    public static final String[] months = {
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
     };
     public static final String[] activeSensorNames = {
             "Sensor Villa Crespo",
@@ -71,6 +73,17 @@ public class SensorFactory {
         };
     }
 
+    public static List<SensorMonthReading> getSensorMonthReadingsList() {
+        List<SensorMonthReading> sensorMonthReadingsList = new ArrayList<>();
+        sensorMonthReadingsList.add(new SensorMonthReading(100L, "January", activeSensorNames[1]));
+        sensorMonthReadingsList.add(new SensorMonthReading(200L, "February", activeSensorNames[2]));
+        sensorMonthReadingsList.add(new SensorMonthReading(300L, "March", activeSensorNames[1]));
+        sensorMonthReadingsList.add(new SensorMonthReading(400L, "April", activeSensorNames[2]));
+        sensorMonthReadingsList.add(new SensorMonthReading(200L, "May", activeSensorNames[3]));
+        sensorMonthReadingsList.add(new SensorMonthReading(300L, "March", activeSensorNames[4]));
+        return sensorMonthReadingsList;
+    }
+
     public static List<DayReading> getDayReadingList () {
         List<DayReading> toReturn = new ArrayList<>();
         for(int i = 0 ; i < 3 ; i++)
@@ -78,6 +91,8 @@ public class SensorFactory {
                 toReturn.add(new DayReading((long) (2019 + i), days[j], (long) (Math.pow(10, i)*j)));
         return toReturn;
     }
+
+
 
 
 
