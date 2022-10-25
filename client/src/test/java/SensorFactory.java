@@ -32,8 +32,8 @@ public class SensorFactory {
     };
 
     //    This method returns a list of SensorReading active objects
-//    The first one is the one with the lowest readings
-//    The last one is the one with the highest readings
+    //    The first one is the one with the lowest readings
+    //    The last one is the one with the highest readings
     public static SensorReading[] getActiveSensors() {
         SensorReading[] sensors = new SensorReading[activeSensorNames.length];
         for (int i = 0; i < activeSensorNames.length; i++) {
