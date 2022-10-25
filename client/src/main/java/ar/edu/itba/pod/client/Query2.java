@@ -2,8 +2,6 @@ package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.collators.PedestriansPerYearCollator;
 import ar.edu.itba.pod.mappers.PedestriansPerYearMapper;
-import ar.edu.itba.pod.models.ActiveSensor;
-import ar.edu.itba.pod.models.DayReading;
 import ar.edu.itba.pod.models.SensorReading;
 import ar.edu.itba.pod.models.YearCount;
 import ar.edu.itba.pod.reducers.PedestriansPerYearReducer;
@@ -12,10 +10,6 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ICompletableFuture;
 import com.hazelcast.core.IList;
 import com.hazelcast.mapreduce.Job;
-import com.hazelcast.mapreduce.JobTracker;
-import com.hazelcast.mapreduce.KeyValueSource;
-
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
@@ -31,15 +25,15 @@ public class Query2 {
 
         FileWriter logWriter = QueryUtils.createFileWriter(
                 parseParameter(args, "-DoutPath")+"/time2.txt");
-        Job<String, DayReading> job = QueryUtils.prepareJob(new Loader(), logWriter, args);
+        Job<String, SensorReading> job = QueryUtils.prepareJob(new Loader(), logWriter, args);
 
-        logWithTimeStamp(logWriter, "Inicio del trabajo map/reduce");
+        logWithTimeStamp(logWriter, MAP_REDUCE_START);
         ICompletableFuture<Stream<Map.Entry<Long, YearCount>>> future = job
                 .mapper(new PedestriansPerYearMapper())
                 .reducer( new PedestriansPerYearReducer<>() )
                 .submit(new PedestriansPerYearCollator());
         Stream<Map.Entry<Long, YearCount>> result = future.get();
-        logWithTimeStamp(logWriter, "Fin del trabajo map/reduce");
+        logWithTimeStamp(logWriter, MAP_REDUCE_END);
 
         FileWriter csvWriter = QueryUtils.createFileWriter(
                 parseParameter(args, "-DoutPath")+"/query2.csv");
@@ -64,13 +58,13 @@ public class Query2 {
         public void loadReadingsFromCsv(String[] args, HazelcastInstance hz, FileWriter timestampWriter) throws IOException {
             String dir = parseParameter(args, "-DinPath");
             List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
-
-            IList<DayReading> readingIList = hz.getList("g9_sensors_readings");
+            IList<SensorReading> readingIList = hz.getList("g9_sensors_readings");
             readingIList.clear();
 
             for(String line : lines) {
                 String[] values = line.split(";");
-                DayReading sr = new DayReading(Long.parseLong(values[2]), values[5], Long.parseLong(values[9]));
+                SensorReading sr = new SensorReading.SensorReadingBuilder(Long.parseLong(values[9]))
+                        .year(Long.parseLong(values[2])).weekDay(values[5]).build();
                 readingIList.add(sr);
             }
         }

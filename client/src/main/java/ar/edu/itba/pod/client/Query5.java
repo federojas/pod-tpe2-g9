@@ -17,7 +17,6 @@ import com.hazelcast.core.IMap;
 import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -35,7 +34,7 @@ public class Query5 {
                 parseParameter(args, "-DoutPath") + "/time5.txt");
         Job<String, SensorReading> job = QueryUtils.prepareJob(new Query1.Loader(),logWriter,args);
 
-        logWithTimeStamp(logWriter, "Inicio del trabajo map/reduce");
+        logWithTimeStamp(logWriter, MAP_REDUCE_START);
         ICompletableFuture<Stream<Map.Entry<String, Long>>> future = job
                 .mapper(new PedestriansBySensorMapper())
                 .combiner(new PedestriansBySensorCombiner<>())
@@ -65,7 +64,7 @@ public class Query5 {
                 .submit(new SensorsPerMillionGroupCollator());
 
         Map<Long, Set<PairedSensors>> result2 = future2.get();
-        logWithTimeStamp(logWriter, "Fin del trabajo map/reduce");
+        logWithTimeStamp(logWriter, MAP_REDUCE_END);
 
         File csvFile = new File(parseParameter(args, "-DoutPath")+"/query5.csv");
         csvFile.createNewFile();

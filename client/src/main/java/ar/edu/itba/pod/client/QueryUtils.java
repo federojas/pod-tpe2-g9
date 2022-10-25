@@ -6,12 +6,9 @@ import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.client.config.ClientNetworkConfig;
 import com.hazelcast.config.GroupConfig;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IList;
 import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
-
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -27,7 +24,10 @@ public final class QueryUtils {
 
     public static final String SENSORS_FILE_NAME = "sensors.csv";
     public static final String READINGS_FILE_NAME = "readings.csv";
-
+    public static final String MAP_REDUCE_START = "Inicio del trabajo map/reduce";
+    public static final String MAP_REDUCE_END = "Fin del trabajo map/reduce";
+    public static final String CSV_READ_START = "Inicio de la lectura del archivo";
+    public static final String CSV_READ_END = "Fin de la lectura del archivo";
     private QueryUtils() {
 
     }
@@ -68,7 +68,8 @@ public final class QueryUtils {
         return lines;
     }
 
-    public static Map<Long, ActiveSensor> getActiveSensors(List<String> sensorLines) {
+    public static Map<Long, ActiveSensor> getActiveSensors(String dir) throws IOException {
+        List<String> sensorLines = prepareCSVLoad(SENSORS_FILE_NAME, dir);
         Map<Long, ActiveSensor> sensorMap = new HashMap<>();
         for (String line : sensorLines) {
             String[] values = line.split(";");
@@ -82,9 +83,9 @@ public final class QueryUtils {
 
     public static <V> Job<String, V> prepareJob(CsvLoader csvLoader, FileWriter fileWriter, String[] args) throws IOException {
         HazelcastInstance hz = QueryUtils.getHazelClientInstance(args);
-        logWithTimeStamp(fileWriter, "Inicio de la lectura del archivo");
+        logWithTimeStamp(fileWriter, CSV_READ_START );
         csvLoader.loadReadingsFromCsv(args,hz,fileWriter);
-        logWithTimeStamp(fileWriter, "Fin de la lectura del archivo");
+        logWithTimeStamp(fileWriter, CSV_READ_END);
 
         final KeyValueSource<String, V> dataSource = KeyValueSource.fromList(
                 hz.getList("g9_sensors_readings"));

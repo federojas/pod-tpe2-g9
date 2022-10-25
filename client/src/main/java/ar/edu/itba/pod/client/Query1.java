@@ -27,7 +27,7 @@ public class Query1 {
 
         Job<String, SensorReading> job = QueryUtils.prepareJob(new Loader(), logWriter, args);
 
-        logWithTimeStamp(logWriter, "Inicio del trabajo map/reduce");
+        logWithTimeStamp(logWriter, MAP_REDUCE_START);
         ICompletableFuture<Stream<Map.Entry<String, Long>>> future = job
                 .mapper(new PedestriansBySensorMapper())
                 .combiner( new PedestriansBySensorCombiner<>() )
@@ -35,7 +35,7 @@ public class Query1 {
                 .submit(new PedestriansPerSensorCollator());
 
         Stream<Map.Entry<String, Long>> result = future.get();
-        logWithTimeStamp(logWriter, "Fin del trabajo map/reduce");
+        logWithTimeStamp(logWriter, MAP_REDUCE_END);
 
         FileWriter csvWriter = QueryUtils.createFileWriter(
                 parseParameter(args, "-DoutPath")+"/query1.csv");
@@ -59,17 +59,16 @@ public class Query1 {
         @Override
         public void loadReadingsFromCsv(String[] args, HazelcastInstance hz, FileWriter timestampWriter) throws IOException {
             String dir = parseParameter(args, "-DinPath");
-            List<String> sensorLines = QueryUtils.prepareCSVLoad(SENSORS_FILE_NAME, dir);
-            Map<Long, ActiveSensor> sensorMap = getActiveSensors(sensorLines);
-
+            Map<Long, ActiveSensor> sensorMap = getActiveSensors(dir);
+            List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
             IList<SensorReading> readingIList = hz.getList("g9_sensors_readings");
             readingIList.clear();
 
-            List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
             for(String line : lines) {
                 String[] values = line.split(";");
                 if(sensorMap.containsKey(Long.parseLong(values[7]))) {
-                    SensorReading sr = new SensorReading(sensorMap.get(Long.parseLong(values[7])).getDescription(), Long.parseLong(values[9]));
+                    SensorReading sr = new SensorReading.SensorReadingBuilder(Long.parseLong(values[9]))
+                            .sensorName(sensorMap.get(Long.parseLong(values[7])).getDescription()).build();
                     readingIList.add(sr);
                 }
             }
