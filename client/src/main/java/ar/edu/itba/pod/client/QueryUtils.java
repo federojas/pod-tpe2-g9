@@ -7,8 +7,12 @@ import com.hazelcast.client.config.ClientNetworkConfig;
 import com.hazelcast.config.GroupConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IList;
+import com.hazelcast.mapreduce.Job;
+import com.hazelcast.mapreduce.JobTracker;
+import com.hazelcast.mapreduce.KeyValueSource;
 
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -58,107 +62,13 @@ public final class QueryUtils {
         logWriter.write(timestamp + " - " + message + "\n");
     }
 
-    public static void loadQuery1ReadingsFromCSV(String[] args, HazelcastInstance hz, FileWriter timestampWriter) throws IOException {
-        String dir = beginCSVLoad(args, timestampWriter);
-        List<String> sensorLines = prepareCSVLoad(SENSORS_FILE_NAME, dir);
-
-        Map<Long, ActiveSensor> sensorMap = getActiveSensors(sensorLines);
-
-        IList<SensorReading> readingIList = hz.getList("g9_sensors_readings");
-        readingIList.clear();
-
-        List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
-        for(String line : lines) {
-            String[] values = line.split(";");
-            if(sensorMap.containsKey(Long.parseLong(values[7]))) {
-                SensorReading sr = new SensorReading(sensorMap.get(Long.parseLong(values[7])).getDescription(), Long.parseLong(values[9]));
-                readingIList.add(sr);
-            }
-        }
-
-        logWithTimeStamp(timestampWriter, "Fin de la lectura del archivo");
-    }
-
-    public static void loadQuery2ReadingsFromCSV(String[] args, HazelcastInstance hz, FileWriter timestampWriter) throws IOException {
-        String dir = beginCSVLoad(args, timestampWriter);
-        List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
-
-        IList<DayReading> readingIList = hz.getList("g9_sensors_readings");
-        readingIList.clear();
-
-        for(String line : lines) {
-            String[] values = line.split(";");
-                DayReading sr = new DayReading(Long.parseLong(values[2]), values[5], Long.parseLong(values[9]));
-                readingIList.add(sr);
-        }
-
-        logWithTimeStamp(timestampWriter, "Fin de la lectura del archivo");
-    }
-
-    public static void loadQuery3ReadingsFromCSV(String[] args, HazelcastInstance hz, FileWriter timestampWriter, String min) throws IOException {
-        String dir = beginCSVLoad(args, timestampWriter);
-        List<String> sensorLines = prepareCSVLoad(SENSORS_FILE_NAME, dir);
-
-        Map<Long, ActiveSensor> sensorMap = getActiveSensors(sensorLines);
-
-        List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
-
-        IList<DateTimeReading> readingIList = hz.getList("g9_sensors_readings");
-        readingIList.clear();
-
-        for(String line : lines) {
-            String[] values = line.split(";");
-            if(sensorMap.containsKey(Long.parseLong(values[7])) && Long.parseLong(values[9]) > Long.parseLong(min)) {
-                DateTimeReading sr = new DateTimeReading(Long.parseLong(values[9]),
-                        Long.parseLong(values[2]),
-                        values[3],
-                        Integer.parseInt(values[4]),
-                        Integer.parseInt(values[6]),
-                        sensorMap.get(Long.parseLong(values[7])).getDescription()
-                        );
-                readingIList.add(sr);
-            }
-        }
-        logWithTimeStamp(timestampWriter, "Fin de la lectura del archivo");
-    }
-
-    public static void loadQuery4ReadingsFromCSV(String[] args, HazelcastInstance hz, FileWriter timestampWriter, Long year) throws IOException {
-        String dir = beginCSVLoad(args, timestampWriter);
-        List<String> sensorLines = prepareCSVLoad(SENSORS_FILE_NAME, dir);
-
-        Map<Long, ActiveSensor> sensorMap = getActiveSensors(sensorLines);
-
-        List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
-
-        IList<SensorMonthReading> readingIList = hz.getList("g9_sensors_readings");
-        readingIList.clear();
-
-        for(String line : lines) {
-            String[] values = line.split(";");
-            if(sensorMap.containsKey(Long.parseLong(values[7])) && Long.parseLong(values[2]) == year) {
-                SensorMonthReading sr = new SensorMonthReading(Long.parseLong(values[9]),
-                        values[3],
-                        sensorMap.get(Long.parseLong(values[7])).getDescription()
-                );
-                readingIList.add(sr);
-            }
-        }
-        logWithTimeStamp(timestampWriter, "Fin de la lectura del archivo");
-    }
-
-    private static String beginCSVLoad(String[] args, FileWriter timestampWriter) throws IOException {
-        String dir = parseParameter(args, "-DinPath");
-        logWithTimeStamp(timestampWriter, "Inicio de la lectura del archivo");
-        return dir;
-    }
-
-    private static List<String> prepareCSVLoad(String file, String dir) throws IOException {
+    public static List<String> prepareCSVLoad(String file, String dir) throws IOException {
         List<String> lines = Files.readAllLines(Paths.get(dir + "/" + file), StandardCharsets.ISO_8859_1);
         lines.remove(0);
         return lines;
     }
 
-    private static Map<Long, ActiveSensor> getActiveSensors(List<String> sensorLines) {
+    public static Map<Long, ActiveSensor> getActiveSensors(List<String> sensorLines) {
         Map<Long, ActiveSensor> sensorMap = new HashMap<>();
         for (String line : sensorLines) {
             String[] values = line.split(";");
@@ -168,5 +78,24 @@ public final class QueryUtils {
             }
         }
         return sensorMap;
+    }
+
+    public static <V> Job<String, V> prepareJob(CsvLoader csvLoader, FileWriter fileWriter, String[] args) throws IOException {
+        HazelcastInstance hz = QueryUtils.getHazelClientInstance(args);
+        logWithTimeStamp(fileWriter, "Inicio de la lectura del archivo");
+        csvLoader.loadReadingsFromCsv(args,hz,fileWriter);
+        logWithTimeStamp(fileWriter, "Fin de la lectura del archivo");
+
+        final KeyValueSource<String, V> dataSource = KeyValueSource.fromList(
+                hz.getList("g9_sensors_readings"));
+
+        JobTracker jt = hz.getJobTracker("g9_jobs");
+        return jt.newJob(dataSource);
+    }
+
+    public static FileWriter createFileWriter(String pathname) throws IOException {
+        File logFile = new File(pathname);
+        logFile.createNewFile();
+        return new FileWriter(logFile);
     }
 }

@@ -3,7 +3,7 @@ package ar.edu.itba.pod.models;
 import java.io.Serializable;
 
 public class YearReading implements Serializable {
-    private Long readings;
+    private final Long readings;
     private boolean isWeekend;
 
     public YearReading(Long readings) {

@@ -3,17 +3,17 @@ package ar.edu.itba.pod.client;
 import ar.edu.itba.pod.collators.PedestriansPerSensorCollator;
 import ar.edu.itba.pod.combiners.PedestriansBySensorCombiner;
 import ar.edu.itba.pod.mappers.PedestriansBySensorMapper;
+import ar.edu.itba.pod.models.ActiveSensor;
 import ar.edu.itba.pod.models.SensorReading;
 import ar.edu.itba.pod.reducers.PedestriansBySensorReducer;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ICompletableFuture;
+import com.hazelcast.core.IList;
 import com.hazelcast.mapreduce.Job;
-import com.hazelcast.mapreduce.JobTracker;
-import com.hazelcast.mapreduce.KeyValueSource;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
@@ -21,24 +21,13 @@ import java.util.stream.Stream;
 import static ar.edu.itba.pod.client.QueryUtils.*;
 
 public class Query1 {
-
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
+        FileWriter logWriter = QueryUtils.createFileWriter(
+                parseParameter(args, "-DoutPath") + "/time1.txt");
 
-        File logFile = new File(parseParameter(args, "-DoutPath")+"/time1.txt");
-        logFile.createNewFile();
-        FileWriter logWriter = new FileWriter(logFile);
-
-        HazelcastInstance hz = QueryUtils.getHazelClientInstance(args);
-        QueryUtils.loadQuery1ReadingsFromCSV(args,hz,logWriter);
-        final KeyValueSource<String, SensorReading> dataSource = KeyValueSource.fromList(
-                hz.getList("g9_sensors_readings"));
-
+        Job<String, SensorReading> job = QueryUtils.prepareJob(new Loader(), logWriter, args);
 
         logWithTimeStamp(logWriter, "Inicio del trabajo map/reduce");
-
-        JobTracker jt = hz.getJobTracker("g9_jobs");
-        Job<String, SensorReading> job = jt.newJob(dataSource);
-
         ICompletableFuture<Stream<Map.Entry<String, Long>>> future = job
                 .mapper(new PedestriansBySensorMapper())
                 .combiner( new PedestriansBySensorCombiner<>() )
@@ -46,10 +35,10 @@ public class Query1 {
                 .submit(new PedestriansPerSensorCollator());
 
         Stream<Map.Entry<String, Long>> result = future.get();
+        logWithTimeStamp(logWriter, "Fin del trabajo map/reduce");
 
-        File csvFile = new File(parseParameter(args, "-DoutPath")+"/query1.csv");
-        csvFile.createNewFile();
-        FileWriter csvWriter = new FileWriter(csvFile);
+        FileWriter csvWriter = QueryUtils.createFileWriter(
+                parseParameter(args, "-DoutPath")+"/query1.csv");
 
         csvWriter.write("Sensor;Total_Count\n");
 
@@ -61,12 +50,29 @@ public class Query1 {
             }
         });
 
-        logWithTimeStamp(logWriter, "Fin del trabajo map/reduce");
-
         logWriter.close();
         csvWriter.close();
         HazelcastClient.shutdownAll();
     }
 
+    public static class Loader implements CsvLoader {
+        @Override
+        public void loadReadingsFromCsv(String[] args, HazelcastInstance hz, FileWriter timestampWriter) throws IOException {
+            String dir = parseParameter(args, "-DinPath");
+            List<String> sensorLines = QueryUtils.prepareCSVLoad(SENSORS_FILE_NAME, dir);
+            Map<Long, ActiveSensor> sensorMap = getActiveSensors(sensorLines);
 
+            IList<SensorReading> readingIList = hz.getList("g9_sensors_readings");
+            readingIList.clear();
+
+            List<String> lines = prepareCSVLoad(READINGS_FILE_NAME, dir);
+            for(String line : lines) {
+                String[] values = line.split(";");
+                if(sensorMap.containsKey(Long.parseLong(values[7]))) {
+                    SensorReading sr = new SensorReading(sensorMap.get(Long.parseLong(values[7])).getDescription(), Long.parseLong(values[9]));
+                    readingIList.add(sr);
+                }
+            }
+        }
+    }
 }

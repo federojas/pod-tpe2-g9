@@ -27,26 +27,15 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
-import static ar.edu.itba.pod.client.QueryUtils.logWithTimeStamp;
-import static ar.edu.itba.pod.client.QueryUtils.parseParameter;
+import static ar.edu.itba.pod.client.QueryUtils.*;
 
 public class Query5 {
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
-        File logFile = new File(parseParameter(args, "-DoutPath") + "/time5.txt");
-        logFile.createNewFile();
-        FileWriter logWriter = new FileWriter(logFile);
-
-        HazelcastInstance hz = QueryUtils.getHazelClientInstance(args);
-        QueryUtils.loadQuery1ReadingsFromCSV(args, hz, logWriter);
-        final KeyValueSource<String, SensorReading> dataSource = KeyValueSource.fromList(
-                hz.getList("g9_sensors_readings"));
-
+        FileWriter logWriter = createFileWriter(
+                parseParameter(args, "-DoutPath") + "/time5.txt");
+        Job<String, SensorReading> job = QueryUtils.prepareJob(new Query1.Loader(),logWriter,args);
 
         logWithTimeStamp(logWriter, "Inicio del trabajo map/reduce");
-
-        JobTracker jt = hz.getJobTracker("g9_jobs");
-        Job<String, SensorReading> job = jt.newJob(dataSource);
-
         ICompletableFuture<Stream<Map.Entry<String, Long>>> future = job
                 .mapper(new PedestriansBySensorMapper())
                 .combiner(new PedestriansBySensorCombiner<>())
@@ -55,17 +44,18 @@ public class Query5 {
 
         Stream<Map.Entry<String, Long>> result = future.get();
 
+        HazelcastInstance hz = QueryUtils.getHazelClientInstance(args);
         final IMap<String, Long> pedestriansPerSensorMap = hz.getMap("g9_pedestriansPerSensor");
         pedestriansPerSensorMap.clear();
         result.forEach(r -> {
             String key = r.getKey();
             Long value = r.getValue();
-            System.out.println(key + ": " + value);
             pedestriansPerSensorMap.put(key, value);
         });
 
         KeyValueSource<String, Long> dataSource2 = KeyValueSource.fromMap(pedestriansPerSensorMap);
 
+        JobTracker jt = hz.getJobTracker("g9_jobs");
         Job<String, Long> job2 = jt.newJob(dataSource2);
 
         ICompletableFuture<Map<Long, Set<PairedSensors>>> future2 = job2
@@ -75,15 +65,13 @@ public class Query5 {
                 .submit(new SensorsPerMillionGroupCollator());
 
         Map<Long, Set<PairedSensors>> result2 = future2.get();
-
+        logWithTimeStamp(logWriter, "Fin del trabajo map/reduce");
 
         File csvFile = new File(parseParameter(args, "-DoutPath")+"/query5.csv");
         csvFile.createNewFile();
         FileWriter csvWriter = new FileWriter(csvFile);
 
         csvWriter.write("Group;Sensor A;Sensor B\n");
-
-        System.out.println("Size del keyset: " + result2.keySet().size());
         result2.keySet().forEach(group -> {
             for (PairedSensors pair : result2.get(group)) {
                 try {
@@ -97,8 +85,6 @@ public class Query5 {
                 }
             }
         });
-
-        logWithTimeStamp(logWriter, "Fin del trabajo map/reduce");
 
         logWriter.close();
         csvWriter.close();
