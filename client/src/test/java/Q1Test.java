@@ -34,6 +34,7 @@ public class Q1Test extends QueryTest {
         String expectedLowestSensor = SensorFactory.activeSensorNames[0];
 
         IList<SensorReading> readingIList = client.getList(queryName);
+        readingIList.clear();
 
 //        Generate lots of readings for each sensor
 //        It's certain that the first one will be the one with the lowest readings
