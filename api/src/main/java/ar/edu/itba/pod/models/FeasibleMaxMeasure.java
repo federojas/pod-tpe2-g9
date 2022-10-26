@@ -2,6 +2,7 @@ package ar.edu.itba.pod.models;
 
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.Objects;
 
 public class FeasibleMaxMeasure implements Serializable, Comparable<FeasibleMaxMeasure> {
     private final Long readings;
@@ -64,4 +65,5 @@ public class FeasibleMaxMeasure implements Serializable, Comparable<FeasibleMaxM
                 return -1;
         }
     }
+
 }
