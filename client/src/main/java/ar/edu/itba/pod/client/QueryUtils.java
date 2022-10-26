@@ -28,6 +28,7 @@ public final class QueryUtils {
     public static final String MAP_REDUCE_END = "Fin del trabajo map/reduce";
     public static final String CSV_READ_START = "Inicio de la lectura del archivo";
     public static final String CSV_READ_END = "Fin de la lectura del archivo";
+    public static final Integer CHUNK_SIZE = 100;
     private QueryUtils() {
 
     }

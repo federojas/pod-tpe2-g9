@@ -12,6 +12,7 @@ import com.hazelcast.core.IList;
 import com.hazelcast.mapreduce.Job;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -61,11 +62,16 @@ public class Query2 {
             IList<SensorReading> readingIList = hz.getList("g9_sensors_readings");
             readingIList.clear();
 
+            List<SensorReading> chunk = new ArrayList<>(CHUNK_SIZE);
             for(String line : lines) {
                 String[] values = line.split(";");
                 SensorReading sr = new SensorReading.SensorReadingBuilder(Long.parseLong(values[9]))
                         .year(Long.parseLong(values[2])).weekDay(values[5]).build();
-                readingIList.add(sr);
+                chunk.add(sr);
+                if(chunk.size() == CHUNK_SIZE) {
+                    readingIList.addAll(chunk);
+                    chunk.clear();
+                }
             }
         }
     }
