@@ -73,6 +73,8 @@ public class Query2 {
                     chunk.clear();
                 }
             }
+            if(!chunk.isEmpty())
+                readingIList.addAll(chunk);
         }
     }
 }

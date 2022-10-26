@@ -82,6 +82,8 @@ public class Query3 {
                     }
                 }
             }
+            if(!chunk.isEmpty())
+                readingIList.addAll(chunk);
         }
     }
 }
