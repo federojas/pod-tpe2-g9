@@ -5,7 +5,6 @@ import ar.edu.itba.pod.combiners.SensorsPerMillionGroupCombiner;
 import ar.edu.itba.pod.mappers.PedestriansBySensorMapper;
 import ar.edu.itba.pod.mappers.SensorsPerMillionGroupMapper;
 import ar.edu.itba.pod.models.PairedSensors;
-import ar.edu.itba.pod.models.SensorMonthReading;
 import ar.edu.itba.pod.models.SensorReading;
 import ar.edu.itba.pod.reducers.PedestriansBySensorReducer;
 import ar.edu.itba.pod.reducers.SensorsPerMillionGroupReducer;
@@ -17,13 +16,11 @@ import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
 import org.junit.Test;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static junit.framework.TestCase.assertEquals;
 
 public class Q5Test extends QueryTest {
 
@@ -57,7 +54,7 @@ public class Q5Test extends QueryTest {
         result.forEach(r -> {
             String key = r.getKey();
             Long value = r.getValue();
-            System.out.println(key + ": " + value);
+//            System.out.println(key + ": " + value);
             pedestriansPerSensorMap.put(key, value);
         });
 
@@ -72,13 +69,36 @@ public class Q5Test extends QueryTest {
                 .submit(new SensorsPerMillionGroupCollator());
 
         Map<Long, Set<PairedSensors>> result2 = future2.get();
+        Map<Long, Set<PairedSensors>> expected = getProcessedData(sensorReadings);
+        Long[] resultKeys = result2.keySet().toArray(new Long[result2.size()]);
+        Long[] expectedKeys = expected.keySet().toArray(new Long[expected.size()]);
+        for (int i = 0 ; i < expectedKeys.length ; i++){
+            assertEquals(expectedKeys[i], resultKeys[i]);
+            assertSets(expected.get(expectedKeys[i]), result2.get(resultKeys[i]));
 
-        result2.forEach((k, v) -> {
-            if(v.size() > 0) {
-                v.forEach(x -> System.out.print(k + ": " + x.getSensorA() + ", " + x.getSensorB() + "\n"));
-            }
-        });
+        }
+    }
+
+    private void assertSets(Set<PairedSensors> expected, Set<PairedSensors> result){
+        assertEquals(expected.size(), result.size());
+        PairedSensors[] expectedArray = expected.toArray(new PairedSensors[expected.size()]);
+        PairedSensors[] resultArray = result.toArray(new PairedSensors[result.size()]);
+        for (int i = 0 ; i < expectedArray.length ; i++){
+            assertEquals(expectedArray[i].getSensorA(), resultArray[i].getSensorA());
+            assertEquals(expectedArray[i].getSensorB(), resultArray[i].getSensorB());
+        }
+    }
 
 
+    private Map<Long, Set<PairedSensors>> getProcessedData(List<SensorReading> sensorReadings) {
+        Map<Long, Set<PairedSensors>> toReturn =  new TreeMap<>(Comparator.reverseOrder());
+        toReturn.put(3000000L, new TreeSet<>(Comparator.comparing(PairedSensors::getSensorA).thenComparing(PairedSensors::getSensorB)));
+        toReturn.put(2000000L, new TreeSet<>(Comparator.comparing(PairedSensors::getSensorA).thenComparing(PairedSensors::getSensorB)));
+        toReturn.get(3000000L).add(new PairedSensors(sensorReadings.get(2).getSensorName(), sensorReadings.get(3).getSensorName()));
+        toReturn.get(2000000L).add(new PairedSensors(sensorReadings.get(0).getSensorName(), sensorReadings.get(1).getSensorName()));
+        toReturn.get(2000000L).add(new PairedSensors(sensorReadings.get(0).getSensorName(), sensorReadings.get(5).getSensorName()));
+        toReturn.get(2000000L).add(new PairedSensors(sensorReadings.get(1).getSensorName(), sensorReadings.get(5).getSensorName()));
+
+        return toReturn;
     }
 }
