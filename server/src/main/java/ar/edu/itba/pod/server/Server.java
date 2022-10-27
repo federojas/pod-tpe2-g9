@@ -15,7 +15,7 @@ public class Server {
 
     public static void main(String[] args) throws IOException {
         logger.info("Server starting");
-        String ip = "10.9.*.*", name = "g9", pass = "g9-pass";
+        String ip = "192.168.*.*", name = "g9", pass = "g9-pass";
         try {
             Properties props = new Properties();
             InputStream inputStream = Server.class.getClassLoader().getResourceAsStream(propertiesFile);
@@ -24,9 +24,6 @@ public class Server {
                 throw new IllegalArgumentException();
             props.load(inputStream);
             ip = props.getProperty("ip");
-            name = props.getProperty("name");
-            pass = props.getProperty("pass");
-
         } catch (IllegalArgumentException e) {
             logger.error(e.getMessage());
         }

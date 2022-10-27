@@ -36,6 +36,10 @@ chmod u+x query*
 
 Para realizar todos los pasos anteriores puede utilizar el script build.sh
 
+Por default la interfaz de red que el servidor usa es `192.168.*.*`
+pero esto es modificable creando un archivo config.properties dentro de
+server/src/main/resources con una linea ip = [ip deseada] y compilando otra vez.
+
 Para encender el server ejecutar el script "run-server"
 
 ```bash
