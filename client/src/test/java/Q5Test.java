@@ -27,9 +27,9 @@ public class Q5Test extends QueryTest {
     @Test
     public void test() throws ExecutionException, InterruptedException {
         List<SensorReading> sensorReadings = SensorFactory.getQ5SensorReadingsList();
-        String queryName = "Q5_G9";
-        String queryJob = "Q5_G9_Job";
-        String mapName = "Q5_G9_Map";
+        String queryName = "g9-Q5";
+        String queryJob = "g9-Q5-Job";
+        String mapName = "g9-Q5-Map";
 
         final KeyValueSource<String, SensorReading> source =
                 KeyValueSource.fromList(client.getList(queryName));

@@ -24,8 +24,8 @@ public class Q4Test extends QueryTest {
         @Test
         public void test() throws ExecutionException, InterruptedException {
             List<SensorReading> sensorMonthReadings = SensorFactory.getSensorMonthReadingsList();
-            String queryName = "Q4_G9";
-            String queryJob = "Q4_G9_Job";
+            String queryName = "g9-Q4";
+            String queryJob = "g9-Q4-Job";
 
             List<Pair<String, MonthAverage>> expected = getExpectedResult();
 

@@ -33,8 +33,8 @@ public class Q3Test extends QueryTest {
         SensorReading[] dateTimeReadings = SensorFactory.getDateTimeReadings();
         long minCount = SensorFactory.MIN_COUNT;
 
-        String queryName = "Q3_G9";
-        String queryJob = "Q3_G9_Job";
+        String queryName = "g9-Q3";
+        String queryJob = "g9-Q3-Job";
 
         IList<SensorReading> readingIList = client.getList(queryName);
         readingIList.clear();

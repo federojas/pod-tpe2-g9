@@ -26,8 +26,8 @@ public class Q1Test extends QueryTest {
         SensorReading[] activeSensors = SensorFactory.getActiveSensors();
         int activeSensorsLength = activeSensors.length;
         long activeSensorsStep = SensorFactory.ACTIVE_SENSOR_STEP;
-        String queryName = "Q1_G9";
-        String queryJob = "Q1_G9_Job";
+        String queryName = "g9-Q1";
+        String queryJob = "g9-Q1-Job";
 
         String expectedHighestSensor = SensorFactory.activeSensorNames[activeSensorsLength - 1];
         long expectedHighestCount = activeSensorsLength * activeSensorsLength * activeSensorsStep;
