@@ -3,7 +3,6 @@ import ar.edu.itba.pod.collators.PedestriansPerSensorCollator;
 import ar.edu.itba.pod.combiners.PedestriansBySensorCombiner;
 import ar.edu.itba.pod.mappers.MaxMeasurePerSensorMapper;
 import ar.edu.itba.pod.mappers.PedestriansBySensorMapper;
-import ar.edu.itba.pod.models.DateTimeReading;
 import ar.edu.itba.pod.models.FeasibleMaxMeasure;
 import ar.edu.itba.pod.models.SensorReading;
 import ar.edu.itba.pod.reducers.MaxMeasurePerSensorReducer;
@@ -31,26 +30,26 @@ public class Q3Test extends QueryTest {
 
     @Test
     public void test() throws ExecutionException, InterruptedException {
-        DateTimeReading[] dateTimeReadings = SensorFactory.getDateTimeReadings();
+        SensorReading[] dateTimeReadings = SensorFactory.getDateTimeReadings();
         long minCount = SensorFactory.MIN_COUNT;
 
         String queryName = "Q3_G9";
         String queryJob = "Q3_G9_Job";
 
-        IList<DateTimeReading> readingIList = client.getList(queryName);
+        IList<SensorReading> readingIList = client.getList(queryName);
         readingIList.clear();
 
-        for (DateTimeReading dateTimeReading : dateTimeReadings) {
+        for (SensorReading dateTimeReading : dateTimeReadings) {
             if (dateTimeReading.getReadings() > minCount) {
                 readingIList.add(dateTimeReading);
             }
         }
 
-        final KeyValueSource<String, DateTimeReading> source =
+        final KeyValueSource<String, SensorReading> source =
                 KeyValueSource.fromList(client.getList(queryName));
 
         JobTracker jt = client.getJobTracker(queryJob);
-        Job<String, DateTimeReading> job = jt.newJob(source);
+        Job<String, SensorReading> job = jt.newJob(source);
 
         ICompletableFuture<Stream<Map.Entry<String, FeasibleMaxMeasure>>> future = job
                 .mapper(new MaxMeasurePerSensorMapper())

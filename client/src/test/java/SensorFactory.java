@@ -50,7 +50,7 @@ public class SensorFactory {
     public static SensorReading[] getActiveSensors() {
         SensorReading[] sensors = new SensorReading[activeSensorNames.length];
         for (int i = 0; i < activeSensorNames.length; i++) {
-            sensors[i] = new SensorReading(activeSensorNames[i], activeSensorReadings[i]);
+            sensors[i] = new SensorReading.SensorReadingBuilder(activeSensorReadings[i]).sensorName(activeSensorNames[i]).build();
         }
         return sensors;
     }
@@ -59,36 +59,36 @@ public class SensorFactory {
     public static long HIGHEST_COUNT = (long) Math.pow(ACTIVE_SENSOR_STEP, 6);
     public static int Q3_EXPECTED_OUTPUT_LENGTH = 6;
     //    Only the last 3 sensors will satisfy the minimum condition
-    public static DateTimeReading[] getDateTimeReadings() {
-        return new DateTimeReading[]{
-                new DateTimeReading((long) Math.pow(ACTIVE_SENSOR_STEP, 0), 2018L, "January", 1, 0, activeSensorNames[0]),
-                new DateTimeReading((long) Math.pow(ACTIVE_SENSOR_STEP, 1), 2018L, "January", 1, 0, activeSensorNames[1]),
-                new DateTimeReading((long) Math.pow(ACTIVE_SENSOR_STEP, 2), 2018L, "January", 1, 0, activeSensorNames[2]),
-                new DateTimeReading((long) Math.pow(ACTIVE_SENSOR_STEP, 3), 2018L, "January", 1, 1, activeSensorNames[3]),
-                new DateTimeReading((long) Math.pow(ACTIVE_SENSOR_STEP, 4), 2018L, "January", 1, 2, activeSensorNames[4]),
-                new DateTimeReading((long) Math.pow(ACTIVE_SENSOR_STEP, 5), 2018L, "January", 1, 3, activeSensorNames[5]),
-                new DateTimeReading(HIGHEST_COUNT, 2018L, "January", 1, 4, activeSensorNames[0]),
-                new DateTimeReading(HIGHEST_COUNT, 2018L, "January", 1, 5, activeSensorNames[1]),
-                new DateTimeReading(HIGHEST_COUNT, 2018L, "January", 1, 6, activeSensorNames[2]),
+    public static SensorReading[] getDateTimeReadings() {
+        return new SensorReading[]{
+                new SensorReading.SensorReadingBuilder((long) Math.pow(ACTIVE_SENSOR_STEP, 0)).year(2018L).month("January").day(1).time(0).sensorName(activeSensorNames[0]).build(),
+                new SensorReading.SensorReadingBuilder((long) Math.pow(ACTIVE_SENSOR_STEP, 1)).year(2018L).month("January").day(1).time(0).sensorName(activeSensorNames[1]).build(),
+                new SensorReading.SensorReadingBuilder((long) Math.pow(ACTIVE_SENSOR_STEP, 2)).year(2018L).month("January").day(1).time(0).sensorName(activeSensorNames[2]).build(),
+                new SensorReading.SensorReadingBuilder((long) Math.pow(ACTIVE_SENSOR_STEP, 3)).year(2018L).month("January").day(1).time(1).sensorName(activeSensorNames[3]).build(),
+                new SensorReading.SensorReadingBuilder((long) Math.pow(ACTIVE_SENSOR_STEP, 4)).year(2018L).month("January").day(1).time(2).sensorName(activeSensorNames[4]).build(),
+                new SensorReading.SensorReadingBuilder((long) Math.pow(ACTIVE_SENSOR_STEP, 5)).year(2018L).month("January").day(1).time(3).sensorName(activeSensorNames[5]).build(),
+                new SensorReading.SensorReadingBuilder(HIGHEST_COUNT).year(2018L).month("January").day(1).time(4).sensorName(activeSensorNames[0]).build(),
+                new SensorReading.SensorReadingBuilder(HIGHEST_COUNT).year(2018L).month("January").day(1).time(5).sensorName(activeSensorNames[1]).build(),
+                new SensorReading.SensorReadingBuilder(HIGHEST_COUNT).year(2018L).month("January").day(1).time(6).sensorName(activeSensorNames[2]).build(),
         };
     }
 
-    public static List<SensorMonthReading> getSensorMonthReadingsList() {
-        List<SensorMonthReading> sensorMonthReadingsList = new ArrayList<>();
-        sensorMonthReadingsList.add(new SensorMonthReading(100L, "January", activeSensorNames[1]));
-        sensorMonthReadingsList.add(new SensorMonthReading(200L, "February", activeSensorNames[2]));
-        sensorMonthReadingsList.add(new SensorMonthReading(300L, "March", activeSensorNames[1]));
-        sensorMonthReadingsList.add(new SensorMonthReading(400L, "April", activeSensorNames[2]));
-        sensorMonthReadingsList.add(new SensorMonthReading(200L, "May", activeSensorNames[3]));
-        sensorMonthReadingsList.add(new SensorMonthReading(300L, "March", activeSensorNames[4]));
+    public static List<SensorReading> getSensorMonthReadingsList() {
+        List<SensorReading> sensorMonthReadingsList = new ArrayList<>();
+        sensorMonthReadingsList.add(new SensorReading.SensorReadingBuilder(100L).month("January").sensorName(activeSensorNames[1]).build());
+        sensorMonthReadingsList.add(new SensorReading.SensorReadingBuilder(200L).month("February").sensorName(activeSensorNames[2]).build());
+        sensorMonthReadingsList.add(new SensorReading.SensorReadingBuilder(300L).month("March").sensorName(activeSensorNames[1]).build());
+        sensorMonthReadingsList.add(new SensorReading.SensorReadingBuilder(400L).month("April").sensorName(activeSensorNames[2]).build());
+        sensorMonthReadingsList.add(new SensorReading.SensorReadingBuilder(200L).month("May").sensorName(activeSensorNames[3]).build());
+        sensorMonthReadingsList.add(new SensorReading.SensorReadingBuilder(300L).month("March").sensorName(activeSensorNames[4]).build());
         return sensorMonthReadingsList;
     }
 
-    public static List<DayReading> getDayReadingList () {
-        List<DayReading> toReturn = new ArrayList<>();
+    public static List<SensorReading> getDayReadingList () {
+        List<SensorReading> toReturn = new ArrayList<>();
         for(int i = 0 ; i < 3 ; i++)
             for(int j = 0 ; j < days.length ; j++)
-                toReturn.add(new DayReading((long) (2019 + i), days[j], (long) (Math.pow(10, i)*j)));
+                toReturn.add(new SensorReading.SensorReadingBuilder( (long) (Math.pow(10, i)*j)).year((long) (2019 + i)).weekDay(days[j]).build());
         return toReturn;
     }
 
@@ -121,12 +121,13 @@ public class SensorFactory {
 
     public static List<SensorReading> getQ5SensorReadingsList() {
         List<SensorReading> sensorReadingsList = new ArrayList<>();
-        sensorReadingsList.add(new SensorReading(activeSensorNames[0], 2500000L));
-        sensorReadingsList.add(new SensorReading(activeSensorNames[1], 2000000L));
-        sensorReadingsList.add(new SensorReading(activeSensorNames[2], 3000000L));
-        sensorReadingsList.add(new SensorReading(activeSensorNames[3], 3200000L));
-        sensorReadingsList.add(new SensorReading(activeSensorNames[4], 1000000L));
-        sensorReadingsList.add(new SensorReading(activeSensorNames[5], 2999999L));
+
+        sensorReadingsList.add(new SensorReading.SensorReadingBuilder(2500000L).sensorName(activeSensorNames[0]).build());
+        sensorReadingsList.add(new SensorReading.SensorReadingBuilder(2000000L).sensorName(activeSensorNames[1]).build());
+        sensorReadingsList.add(new SensorReading.SensorReadingBuilder(3000000L).sensorName(activeSensorNames[2]).build());
+        sensorReadingsList.add(new SensorReading.SensorReadingBuilder(3200000L).sensorName(activeSensorNames[3]).build());
+        sensorReadingsList.add(new SensorReading.SensorReadingBuilder(1000000L).sensorName(activeSensorNames[4]).build());
+        sensorReadingsList.add(new SensorReading.SensorReadingBuilder(2999999L).sensorName(activeSensorNames[5]).build());
         return sensorReadingsList;
     }
 }

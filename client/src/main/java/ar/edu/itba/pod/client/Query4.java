@@ -38,7 +38,7 @@ public class Query4 {
 
         FileWriter csvWriter = createFileWriter(parseParameter(args, "-DoutPath")+"/query4.csv");
 
-        csvWriter.write("Sensor;Month,Max_Monthly_Avg\n");
+        csvWriter.write("Sensor;Month;Max_Monthly_Avg\n");
         result.forEach(r -> {
             try {
                 csvWriter.write(r.getKey() + ";" + r.getValue().getMonth() + ";"

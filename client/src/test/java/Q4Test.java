@@ -23,20 +23,20 @@ public class Q4Test extends QueryTest {
 
         @Test
         public void test() throws ExecutionException, InterruptedException {
-            List<SensorMonthReading> sensorMonthReadings = SensorFactory.getSensorMonthReadingsList();
+            List<SensorReading> sensorMonthReadings = SensorFactory.getSensorMonthReadingsList();
             String queryName = "Q4_G9";
             String queryJob = "Q4_G9_Job";
 
             List<Pair<String, MonthAverage>> expected = getExpectedResult();
 
-            IList<SensorMonthReading> readingIList = client.getList(queryName);
+            IList<SensorReading> readingIList = client.getList(queryName);
             readingIList.addAll(sensorMonthReadings);
 
-            final KeyValueSource<String, SensorMonthReading> source =
+            final KeyValueSource<String, SensorReading> source =
                     KeyValueSource.fromList(client.getList(queryName));
 
             JobTracker jt = client.getJobTracker(queryJob);
-            Job<String, SensorMonthReading> job = jt.newJob(source);
+            Job<String, SensorReading> job = jt.newJob(source);
 
             ICompletableFuture<Stream<Map.Entry<String, MonthAverage>>> future = job
                     .mapper(new AverageMeasurePerMonthMapper())
